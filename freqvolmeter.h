@@ -24,8 +24,8 @@ typedef struct {
 	flag_short_t comparator;
 } sensor;
 
-#define NACTUAL_PERIOD_TIMEOUT 1
-#define NACTUAL_PERIOD_DIRTY 2
+#define ETIMEOUT 1
+#define EDIRTY 2
 typedef struct {
 	period_t period; //in usecs
 	volume_t volume;

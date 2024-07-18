@@ -52,9 +52,9 @@ sensor_value* read_sensor(sensor* sens, sensor_value* buf)
 		buf->peek = buf->volume >= ADC_MAX_RMS;
 		buf->notactual = 0;
 		if (sens->period_tmp.last * 1000000 / samplerate > PERIOD_TIMEOUT)
-			buf->notactual = NACTUAL_PERIOD_TIMEOUT;
+			buf->notactual = ETIMEOUT;
 		if (buf->period > PERIOD_TIMEOUT || buf->period <= PERIOD_MIN)
-			buf->notactual =  NACTUAL_PERIOD_DIRTY;
+			buf->notactual =  EDIRTY;
 		semaphore_post(sem);
 		
 		return buf;
