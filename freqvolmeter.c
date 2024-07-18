@@ -19,7 +19,7 @@ void adcprocess()
 	{
 		volume_t ADC_voltage = ADC_MAX * inputbuf[i];
 		sens.volume_tmp += (ADC_voltage > ADC_ZERO_SIN)? ADC_voltage - ADC_ZERO_SIN : ADC_ZERO_SIN - ADC_voltage;
-		sens.mecount_tmp++;
+		sens.measurments_tmp++;
 		sens.period_tmp.period++;
 		if (ADC_voltage > COMPARATOR_TRESHOLD)
 		{
@@ -28,9 +28,9 @@ void adcprocess()
 		{
 			sens.comparator = 0;
 			sens.volume = sens.volume_tmp;
-			sens.mecount = sens.mecount_tmp;
+			sens.measurments = sens.measurments_tmp;
 			sens.volume_tmp = 0;
-			sens.mecount_tmp = 0;
+			sens.measurments_tmp = 0;
 			sens.period = sens.period_tmp.period;
 			sens.period_tmp.period = 0;
 		}
@@ -47,8 +47,8 @@ sensor_value* read_sensor(sensor* sens, sensor_value* buf)
 {
 		semaphore_wait(sem);
 		buf->period = sens->period * 1000000 / samplerate;
-		buf->accuracy = sens->mecount;
-		buf->volume = (sens->mecount != 0)? sens->volume / sens->mecount : 0;
+		buf->accuracy = sens->measurments;
+		buf->volume = (sens->measurments != 0)? sens->volume / sens->measurments : 0;
 		buf->peek = buf->volume >= ADC_MAX_RMS;
 		buf->notactual = 0;
 		if (sens->period_tmp.last * 1000000 / samplerate > PERIOD_TIMEOUT)

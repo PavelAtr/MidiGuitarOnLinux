@@ -13,9 +13,9 @@
 
 typedef struct {
 	volume_long_t volume;
-	ucounter_t mecount; //in 1/samplerate points
+	ucounter_t measurments; //in 1/samplerate points
 	volume_long_t volume_tmp;
-	ucounter_t mecount_tmp; //in 1/samplerate points
+	ucounter_t measurments_tmp; //in 1/samplerate points
 	period_t period; //in 1/samplerate points
 	union {
 		period_t period; //in 1/samplerate points
