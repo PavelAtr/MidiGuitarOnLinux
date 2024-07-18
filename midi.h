@@ -13,6 +13,12 @@
 #define MIDI_STATUS_MASK		0xF0
 #define MIDI_CHANNEL_MASK		0x0F
 
+#define MIDI_PITCH_ZERO 8191
+#define MIDI_PITCH_HALF 8191
+#define MIDI_PITCH_MAX 16383
+#define MIDI_PITCH_MLSB_MASK 0x7F
+#define MIDI_VELOCITY_MAX 0x7F
+
 typedef struct {
 	unsigned int len;
 	char data[4];
