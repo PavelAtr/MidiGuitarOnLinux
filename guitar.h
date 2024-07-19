@@ -33,11 +33,12 @@ typedef struct {
 #define PITCH_MIN -200 //in percent
 #define PITCH_TRESHOLD 70 //in percent 200% = 2 semitone
 #define PITCH_STEP 10 // in percent 200% = 2 semitone
-#define VOLUME_MAX (ADC_MAX_RMS * 0.8)
+#define VOLUME_MAX 4000
+#define VOLUME_NOISE COMPARATOR_TRESHOLD
 
 
-struna struna1;
-struna struna2;
+extern struna struna1;
+extern struna struna2;
 
 void perform_freq(sensor* sens, struna* str);
 void perform_send();

@@ -49,7 +49,6 @@ sensor_value* read_sensor(sensor* sens, sensor_value* buf)
 		buf->period = sens->period * 1000000 / samplerate;
 		buf->accuracy = sens->measurments;
 		buf->volume = (sens->measurments != 0)? sens->volume / sens->measurments : 0;
-		buf->peek = buf->volume >= ADC_MAX_RMS;
 		buf->notactual = 0;
 		if (sens->period_tmp.last * 1000000 / samplerate > PERIOD_TIMEOUT)
 			buf->notactual = ETIMEOUT;

@@ -31,7 +31,6 @@ typedef struct {
 	volume_t volume;
 	ucounter_t accuracy; //in 1/samplerate points
 	bool_t notactual;
-	bool_t peek;
 } sensor_value;
 
 extern sensor sens;

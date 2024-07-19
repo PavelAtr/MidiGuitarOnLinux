@@ -5,6 +5,7 @@
 #include "jack.h"
 #include "midi.h"
 #include "freqvolmeter.h"
+#include "guitar.h"
 
 
 void guitar_baner(void)
@@ -28,7 +29,7 @@ int main(int argc, char** argv)
 	{
 		sensor_value sensvalue;
 		read_sensor(&sens, &sensvalue);
-		if (!sensvalue.notactual)
+		if (!sensvalue.notactual && sensvalue.volume > VOLUME_NOISE)
 			printf("RMS=%d\t\tperiod=%d\t\taccuracy=%d\n", sensvalue.volume, sensvalue.period, sensvalue.accuracy);
 		usleep(100);
 	}
