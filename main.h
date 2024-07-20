@@ -12,6 +12,7 @@ typedef int pitch_t;
 typedef unsigned char flag_short_t;
 typedef char byte_t;
 typedef char bool_t;
+typedef unsigned char errno_t;
 
 
 #define DEBUGMIDI

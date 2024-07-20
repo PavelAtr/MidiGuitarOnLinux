@@ -31,7 +31,7 @@ typedef struct {
 	period_t period; //in usecs
 	volume_t volume;
 	ucounter_t accuracy; //in 1/samplerate points
-	bool_t notactual;
+	errno_t notactual;
 } sensor_value;
 
 extern sensor sens;
