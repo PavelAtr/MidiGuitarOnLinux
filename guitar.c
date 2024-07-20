@@ -3,6 +3,7 @@
 #include "main.h"
 #include "notes.h"
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 struna struna1;
@@ -70,11 +71,9 @@ byte_t normalize_velocity(int volume)
 	return velocity;
 }
 
-void perform_freq(sensor* sens, struna* str)
+void perform_freqvol(sensor_value* sensvalue, struna* str)
 {
-	bool_t ret;// = is_sensor_notactual(sens);
-	
-	if (ret == ETIMEOUT || ret == EDIRTY)
+	if (sensvalue->notactual == ETIMEOUT || sensvalue->notactual == EDIRTY || sensvalue->volume > VOLUME_NOISE)
 	{
 		if (!(str->flags & NOTE_SILENCE))
 		{
@@ -83,10 +82,10 @@ void perform_freq(sensor* sens, struna* str)
 		}
 		return;
 	}
-
+	
 	flag_short_t flags = 0;
 
-//	str->newnote.period = get_period(sens);
+	str->newnote.period = sensvalue->period;
 	search_note(&str->newnote);
 	
 	if (str->newnote.index == -1) return;
@@ -98,7 +97,7 @@ void perform_freq(sensor* sens, struna* str)
 	{
 		note_copy(&str->oldnote, &str->curnote);
 		note_copy(&str->curnote, &str->newnote);
-//		str->curnote.volume = get_volume(sens);;
+		str->curnote.volume = sensvalue->volume;
 		str->flags |= NOTE_NEW;
 		if (!(str->flags & NOTE_SILENCE))
 			str->flags |= NOTE_END;
@@ -118,13 +117,7 @@ void perform_send()
 		#endif
 		
 		#ifdef DEBUGMIDI
-		debug("STR1 note END=");
-		debug(my_itoa(struna1.oldnote.index, tmp));
-		debug(" vel=");
-		debug(my_itoa(normalize_velocity(struna1.oldnote.volume), tmp));
-		debug(" per=");
-		debug(my_itoa(struna1.oldnote.period, tmp));
-		debug("\r\n");
+		printf("STR1 note END=%d vel=%d per=%d\r\n", struna1.oldnote.index, normalize_velocity(struna1.oldnote.volume), struna1.oldnote.period);
 		#endif
 		
 		struna1.flags &= ~NOTE_END;
@@ -137,15 +130,7 @@ void perform_send()
 		#endif
 		
 		#ifdef DEBUGMIDI
-		debug("STR1 note NEW=");
-		debug(my_itoa(struna1.curnote.index, tmp));
-		debug(" vel=");
-		debug(my_itoa(normalize_velocity(struna1.curnote.volume), tmp));
-		debug(" vol=");
-		debug(my_itoa(struna1.curnote.volume, tmp));
-		debug(" per=");
-		debug(my_itoa(struna1.curnote.period, tmp));
-		debug("\r\n");
+		printf("STR1 note NEW=%d vel=%d per=%d\r\n", struna1.curnote.index, normalize_velocity(struna1.curnote.volume), struna1.curnote.period);
 		#endif
 
 		normalize_pitch(&tmppitch, 0);
@@ -155,9 +140,7 @@ void perform_send()
 		#endif
 		
 		#ifdef DEBUGMIDI
-		debug("STR1 PITCHNEW=");
-		debug(my_itoa(0, tmp));
-		debug("\r\n");
+		printf("STR1 PITCHNEW=%d\r\n", 0);
 		#endif
 
 		
@@ -173,107 +156,16 @@ void perform_send()
 		#endif
 		
 		#ifdef DEBUGMIDI
-		debug("STR1 PITCHNEW=");
-		debug(my_itoa(struna1.curnote.bend, tmp));
-		debug("\r\n");
+		printf("STR1 PITCHNEW=%d\r\n", struna1.curnote.bend);
 		#endif
 		
 		struna1.flags &= ~NOTE_NEWPITCH;
 	}
 
 
-	if (struna2.flags & NOTE_END)
-	{
-		#ifdef REALMIDI
-		midiNoteOffOut(struna2.oldnote.index, normalize_velocity(struna2.oldnote.volume), CHANNEL2);
-		#endif
-		
-		#ifdef DEBUGMIDI
-		debug("STR2 note END=");
-		debug(my_itoa(struna2.oldnote.index, tmp));
-		debug(" vel=");
-		debug(my_itoa(normalize_velocity(struna2.oldnote.volume), tmp));
-		debug(" per=");
-		debug(my_itoa(struna2.oldnote.period, tmp));
-		debug("\r\n");
-		#endif
-		
-		struna2.flags &= ~NOTE_END;
-		struna2.flags |= NOTE_SILENCE;
-	}
-	if (struna2.flags & NOTE_NEW)
-	{
-		#ifdef REALMIDI
-		midiNoteOnOut(struna2.curnote.index, normalize_velocity(struna2.curnote.volume), CHANNEL2);
-		#endif
-		
-		#ifdef DEBUGMIDI
-		debug("STR2 note NEW=");
-		debug(my_itoa(struna2.curnote.index, tmp));
-		debug(" vel=");
-		debug(my_itoa(normalize_velocity(struna2.curnote.volume), tmp));
-		debug(" vol=");
-		debug(my_itoa(struna2.curnote.volume, tmp));
-		debug(" per=");
-		debug(my_itoa(struna2.curnote.period, tmp));
-		debug("\r\n");
-		#endif
-
-		normalize_pitch(&tmppitch, 0);
-		
-		#ifdef REALMIDI
-		midiPitchBendOut(tmppitch.bendLSB, tmppitch.bendMSB, CHANNEL2);
-		#endif
-		
-		#ifdef DEBUGMIDI
-		debug("STR2 PITCHNEW=");
-		debug(my_itoa(0, tmp));
-		debug("\r\n");
-		#endif
-		
-		struna2.flags &= ~NOTE_NEW;
-		struna2.flags &= ~NOTE_SILENCE;
-	}
-	if (struna2.flags & NOTE_NEWPITCH)
-	{
-		normalize_pitch(&tmppitch, struna2.curnote.bend);
-		
-		#ifdef REALMIDI
-		midiPitchBendOut(tmppitch.bendLSB, tmppitch.bendMSB, CHANNEL2);
-		#endif
-
-		#ifdef DEBUGMIDI
-		debug("STR2 PITCHNEW=");
-		debug(my_itoa(struna2.curnote.bend, tmp));
-		debug("\r\n");
-		#endif	
-
-		struna2.flags &= ~NOTE_NEWPITCH;
-	}
-	
 	#ifdef DEBUGMIDI
 	//normalize_pitch(&tmppitch, struna1.newnote.bend);
-	//debug(my_itoa(struna1.newnote.index, tmp));
-	//debug(" STR1 PITCH=");
-	//debug(my_itoa(struna1.newnote.bend, tmp));
-	//debug("  REA=");
-	//debug(my_itoa(tmppitch.realpitch, tmp));
-	//debug("  MSB=");
-	//debug(my_itoa(tmppitch.bendMSB, tmp));
-	//debug("  LSB=");
-	//debug(my_itoa(tmppitch.bendLSB, tmp));
-	//debug("\r\n");
+	//printf("%d STR1 PITCH=%d REA=%d MSB=%d LSB=%d\r\n", struna1.newnote.index, struna1.newnote.bend, tmppitch.realpitch, tmppitch.bendMSB, tmppitch.bendLSB);
 	
-	//normalize_pitch(&tmppitch, struna2.newnote.bend);
-	//debug(my_itoa(struna2.newnote.index, tmp));
-	//debug(" STR2 PITCH=");
-	//debug(my_itoa(struna2.newnote.bend, tmp));
-	//debug("  REA=");
-	//debug(my_itoa(tmppitch.realpitch, tmp));
-	//debug("  MSB=");
-	//debug(my_itoa(tmppitch.bendMSB, tmp));
-	//debug("  LSB=");
-	//debug(my_itoa(tmppitch.bendLSB, tmp));
-	//debug("\r\n");
 	#endif
 }

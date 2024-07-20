@@ -13,4 +13,9 @@ typedef unsigned char flag_short_t;
 typedef char byte_t;
 typedef char bool_t;
 
+
+#define DEBUGMIDI
+//#defime DEBUGRAW
+//#define REALMIDI
+
 #endif

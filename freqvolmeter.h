@@ -3,13 +3,14 @@
 #include "main.h"
 #include "jack.h"
 
-#define PERIOD_TIMEOUT 100000
+#define PERIOD_TIMEOUT 40000
 #define PERIOD_MIN 200
 #define ADC_MAX 0xFFFF
 #define ADC_ZERO_SIN 0
 #define ADC_MAX_SIN ADC_MAX
 #define ADC_MAX_RMS (ADC_MAX * 0.638)
-#define COMPARATOR_TRESHOLD 400
+#define VOLUME_NOISE 650
+#define COMPARATOR_TRESHOLD (VOLUME_NOISE / 0.638)
 
 typedef struct {
 	volume_long_t volume;

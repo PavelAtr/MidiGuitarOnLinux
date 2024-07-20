@@ -29,8 +29,15 @@ int main(int argc, char** argv)
 	{
 		sensor_value sensvalue;
 		read_sensor(&sens, &sensvalue);
+		
+		#ifdef DEBUGRAW
 		if (!sensvalue.notactual && sensvalue.volume > VOLUME_NOISE)
 			printf("RMS=%d\t\tperiod=%d\t\taccuracy=%d\n", sensvalue.volume, sensvalue.period, sensvalue.accuracy);
+		#endif
+		
+		perform_freqvol(&sensvalue, &struna1);
+		perform_send();
+		
 		usleep(100);
 	}
 	return 0;
