@@ -65,7 +65,7 @@ pitch* normalize_pitch(pitch* input, pitch_t inpitch)
 
 byte_t normalize_velocity(int volume)
 {
-	byte_t velocity = volume * MIDI_VELOCITY_MAX / VOLUME_MAX ;
+	volume_t velocity = volume * MIDI_VELOCITY_MAX / VOLUME_MAX ;
 	velocity = (velocity >= MIDI_VELOCITY_MAX) ? MIDI_VELOCITY_MAX : velocity;
 	
 	return velocity;

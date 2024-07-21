@@ -9,19 +9,12 @@
 #define ADC_ZERO_SIN 0
 #define ADC_MAX_SIN ADC_MAX
 #define ADC_MAX_RMS (ADC_MAX * 0.638)
-#define VOLUME_NOISE 10000
-#define COMPARATOR_TRESHOLD (VOLUME_NOISE / 0.638)
+#define VOLUME_NOISE 100 	
 
 typedef struct {
 	volume_long_t volume;
 	ucounter_t measurments; //in 1/samplerate points
-	volume_long_t volume_tmp;
-	ucounter_t measurments_tmp; //in 1/samplerate points
 	period_t period; //in 1/samplerate points
-	union {
-		period_t period; //in 1/samplerate points
-		period_t last;
-	} period_tmp;
 	flag_short_t comparator;
 } sensor;
 

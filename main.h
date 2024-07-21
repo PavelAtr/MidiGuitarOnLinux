@@ -6,6 +6,7 @@
 //******** Types: **********
 typedef unsigned int period_t;
 typedef int volume_long_t;
+typedef unsigned long long samplecount_t;
 typedef unsigned int ucounter_t;
 typedef int volume_t;
 typedef int pitch_t;
@@ -15,8 +16,8 @@ typedef char bool_t;
 typedef unsigned char errno_t;
 
 
-#define DEBUGMIDI
-//#defime DEBUGRAW
-#define REALMIDI
+//#define DEBUGMIDI
+#define DEBUGRAW
+//#define REALMIDI
 
 #endif

@@ -31,7 +31,7 @@ int main(int argc, char** argv)
 		read_sensor(&sens, &sensvalue);
 		
 		#ifdef DEBUGRAW
-		if (!sensvalue.notactual && sensvalue.volume > VOLUME_NOISE)
+//		if (!sensvalue.notactual && sensvalue.volume > VOLUME_NOISE)
 			printf("RMS=%d\t\tperiod=%d\t\taccuracy=%d\n", sensvalue.volume, sensvalue.period, sensvalue.accuracy);
 		#endif
 		
