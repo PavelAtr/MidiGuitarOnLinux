@@ -1,7 +1,7 @@
 #ifndef _MAIN_H
 #define _MAIN_H
 
-#define CHANNEL 0
+#define CHANNEL1 0
 
 //******** Types: **********
 typedef unsigned int period_t;
@@ -17,6 +17,6 @@ typedef unsigned char errno_t;
 
 #define DEBUGMIDI
 //#defime DEBUGRAW
-//#define REALMIDI
+#define REALMIDI
 
 #endif

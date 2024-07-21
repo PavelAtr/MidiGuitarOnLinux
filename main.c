@@ -10,15 +10,15 @@
 
 void guitar_baner(void)
 {
-	midiNoteOnOut(0x24, 127, CHANNEL);
+	midiNoteOnOut(0x24, 127, CHANNEL1);
 	sleep(1);
-	midiNoteOffOut(0x24, 127, CHANNEL);
-	midiNoteOnOut(0x28, 127, CHANNEL);
+	midiNoteOffOut(0x24, 127, CHANNEL1);
+	midiNoteOnOut(0x28, 127, CHANNEL1);
 	sleep(1);
-	midiNoteOffOut(0x28, 127, CHANNEL);
-	midiNoteOnOut(0x2B, 127, CHANNEL);
+	midiNoteOffOut(0x28, 127, CHANNEL1);
+	midiNoteOnOut(0x2B, 127, CHANNEL1);
 	sleep(1);
-	midiNoteOffOut(0x2B, 127, CHANNEL);
+	midiNoteOffOut(0x2B, 127, CHANNEL1);
 }
 
 int main(int argc, char** argv)

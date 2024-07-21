@@ -65,7 +65,7 @@ pitch* normalize_pitch(pitch* input, pitch_t inpitch)
 
 byte_t normalize_velocity(int volume)
 {
-	byte_t velocity = (float)volume / VOLUME_MAX * MIDI_VELOCITY_MAX;
+	byte_t velocity = volume * MIDI_VELOCITY_MAX / VOLUME_MAX ;
 	velocity = (velocity >= MIDI_VELOCITY_MAX) ? MIDI_VELOCITY_MAX : velocity;
 	
 	return velocity;
@@ -73,7 +73,7 @@ byte_t normalize_velocity(int volume)
 
 void perform_freqvol(sensor_value* sensvalue, struna* str)
 {
-	if (sensvalue->notactual == ETIMEOUT || sensvalue->notactual == EDIRTY || sensvalue->volume > VOLUME_NOISE)
+	if (sensvalue->notactual == ETIMEOUT || sensvalue->notactual == EDIRTY || sensvalue->volume < VOLUME_NOISE)
 	{
 		if (!(str->flags & NOTE_SILENCE))
 		{
@@ -130,19 +130,18 @@ void perform_send()
 		#endif
 		
 		#ifdef DEBUGMIDI
-		printf("STR1 note NEW=%d vel=%d per=%d\r\n", struna1.curnote.index, normalize_velocity(struna1.curnote.volume), struna1.curnote.period);
+		printf("STR1 note NEW=%d vel=%d per=%d vol=%d\r\n", struna1.curnote.index, normalize_velocity(struna1.curnote.volume), struna1.curnote.period, struna1.curnote.volume);
 		#endif
 
-		normalize_pitch(&tmppitch, 0);
+//		normalize_pitch(&tmppitch, 0);
 		
-		#ifdef REALMIDI
-		midiPitchBendOut(tmppitch.bendLSB, tmppitch.bendMSB, CHANNEL1);
-		#endif
+//		#ifdef REALMIDI
+//		midiPitchBendOut(tmppitch.bendLSB, tmppitch.bendMSB, CHANNEL1);
+//		#endif
 		
-		#ifdef DEBUGMIDI
-		printf("STR1 PITCHNEW=%d\r\n", 0);
-		#endif
-
+//		#ifdef DEBUGMIDI
+//		printf("STR1 PITCHNEW=%d\r\n", 0);
+//		#endif
 		
 		struna1.flags &= ~NOTE_NEW;
 		struna1.flags &= ~NOTE_SILENCE;
