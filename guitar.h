@@ -6,9 +6,10 @@
 
 typedef struct {
 	volume_t volume;
+	period_t period;
+	ucounter_t accuracy;
 	int index;
 	pitch_t bend;
-	period_t period;
 	} note;
 
 typedef struct {
@@ -33,7 +34,7 @@ typedef struct {
 #define PITCH_MIN -200 //in percent
 #define PITCH_TRESHOLD 70 //in percent 200% = 2 semitone
 #define PITCH_STEP 10 // in percent 200% = 2 semitone
-#define VOLUME_MAX 20000
+#define VOLUME_MAX 50000
 
 
 

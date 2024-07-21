@@ -98,6 +98,7 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 		note_copy(&str->oldnote, &str->curnote);
 		note_copy(&str->curnote, &str->newnote);
 		str->curnote.volume = sensvalue->volume;
+		str->curnote.accuracy = sensvalue->accuracy;
 		str->flags |= NOTE_NEW;
 		if (!(str->flags & NOTE_SILENCE))
 			str->flags |= NOTE_END;
@@ -130,7 +131,7 @@ void perform_send()
 		#endif
 		
 		#ifdef DEBUGMIDI
-		printf("STR1 note NEW=%d vel=%d per=%d vol=%d\r\n", struna1.curnote.index, normalize_velocity(struna1.curnote.volume), struna1.curnote.period, struna1.curnote.volume);
+		printf("STR1 note NEW=%d vel=%d per=%d acc=%d vol=%d\r\n", struna1.curnote.index, normalize_velocity(struna1.curnote.volume), struna1.curnote.period, struna1.curnote.accuracy, struna1.curnote.volume);
 		#endif
 
 //		normalize_pitch(&tmppitch, 0);

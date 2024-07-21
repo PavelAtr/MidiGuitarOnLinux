@@ -9,7 +9,7 @@
 #define ADC_ZERO_SIN 0
 #define ADC_MAX_SIN ADC_MAX
 #define ADC_MAX_RMS (ADC_MAX * 0.638)
-#define VOLUME_NOISE 650
+#define VOLUME_NOISE 10000
 #define COMPARATOR_TRESHOLD (VOLUME_NOISE / 0.638)
 
 typedef struct {
