@@ -13,11 +13,11 @@ semaphore_t sem = 0;
 
 sensor sens;
 samplecount_t samplecounter = 0;
+ucounter_t PERIOD_ACCURACY_MIN;
 
 void adcprocess()
 {
-
-	semaphore_wait(sem);
+	semaphore_waitnosleep(sem);
 	for (jack_nframes_t i = 0; i < ports_nframes; i++)
 	{
 		volume_t ADC_voltage = ADC_MAX * inputbuf[i];
@@ -27,13 +27,14 @@ void adcprocess()
 
 		if (ADC_voltage > sens.period_volume_max)
 		{
-			sens.period_volume_max_last = samplecounter;
 			sens.period_volume_max = ADC_voltage;
 			sens.comparator_min = 1;
-			sens.comparator_zero = 1;
 			if (sens.comparator_max)
 			{
 				sens.comparator_max = 0;
+				sens.period_divider_tmp++;
+				if (sens.accuracy_tmp > PERIOD_ACCURACY_MIN)
+					sens.period_volume_max_last = samplecounter;
 			}
 		}
 		if (ADC_voltage < sens.period_volume_min)
@@ -42,22 +43,27 @@ void adcprocess()
 			sens.comparator_max = 1;
 			if (sens.comparator_min)
 			{
-				sens.comparator_min = 0;
-				sens.volume = sens.volume_tmp;
-				sens.accuracy = sens.accuracy_tmp;
-				sens.volume_tmp = 0;
-				sens.accuracy_tmp = 0;
-				sens.prev = sens.cur;
-				sens.cur = sens.period_volume_max_last;
-				sens.measurment_time++;
+				if (sens.accuracy_tmp > PERIOD_ACCURACY_MIN)
+				{
+					sens.comparator_min = 0;
+					sens.prev = sens.cur;
+					sens.cur = sens.period_volume_max_last;
+					sens.volume = sens.volume_tmp;
+					sens.accuracy = sens.accuracy_tmp;
+					sens.period_divider = sens.period_divider_tmp;
+					sens.volume_tmp = 0;
+					sens.accuracy_tmp = 0;
+					sens.period_divider_tmp = 0;
+				}
 			}
 		}
-//		if (!(ADC_voltage > ADC_ZERO_SIN) && sens.comparator_zero)
-		if (abs(ADC_voltage) < VOLUME_NOISE && sens.comparator_zero)
+		if (ADC_voltage > ADC_ZERO_SIN)
+			sens.comparator_zero = 1;
+		else if (sens.comparator_zero)
 		{
 			sens.comparator_zero = 0;
-			sens.period_volume_min = 0.8 * sens.period_volume_min;
 			sens.period_volume_max = 0.8 * sens.period_volume_max;
+			sens.period_volume_min = 0.8 * sens.period_volume_min;
 		}
 	}
 	semaphore_post(sem);
@@ -66,13 +72,12 @@ void adcprocess()
 void freqvolmeter_init()
 {
 	extern_process = &adcprocess;
+	PERIOD_ACCURACY_MIN = ports_nframes / 2;
 	memset(&sens, 0x0, sizeof(sens));
 }
 
 sensor_value* read_sensor(sensor* sens, sensor_value* buf)
 {
-//		sens->measurment_time = 0;
-//		while (sens->measurment_time < MEASURMENT_TIME) usleep(1);
 		semaphore_wait(sem);
 		buf->period = sens->cur - sens->prev;
 		buf->period_accuracy = buf->period;
