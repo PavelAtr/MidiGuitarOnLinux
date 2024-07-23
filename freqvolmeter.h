@@ -22,7 +22,8 @@ typedef struct {
 	volume_long_t volume_tmp;
 	ucounter_t accuracy_tmp;
 	samplecount_t period_volume_max_last;
-	flag_short_t comparator;
+	flag_short_t comparator1;
+	flag_short_t comparator2;
 } sensor;
 
 #define ETIMEOUT 1
