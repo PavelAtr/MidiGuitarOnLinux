@@ -12,19 +12,23 @@
 #define ADC_MAX_RMS (ADC_MAX * 0.638)
 #define VOLUME_NOISE 100 	
 
+#define MEASURMENT_TIME 2 //In signal periods
+
 typedef struct {
 	volume_long_t volume;
 	ucounter_t accuracy; //in 1/samplerate points
 	samplecount_t prev;
 	samplecount_t cur;
+	ucounter_t measurment_time;
 	
 	volume_t period_volume_max;
 	volume_t period_volume_min;
 	volume_long_t volume_tmp;
 	ucounter_t accuracy_tmp;
 	samplecount_t period_volume_max_last;
-	flag_short_t comparator1;
-	flag_short_t comparator2;
+	flag_short_t comparator_zero;
+	flag_short_t comparator_max;
+	flag_short_t comparator_min;
 } sensor;
 
 #define ETIMEOUT 1
