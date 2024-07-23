@@ -14,6 +14,7 @@ typedef struct {
 
 typedef struct {
 	volume_t curvolume;
+	volume_t oldvolume;
 	flag_short_t flags;
 	note oldnote;
 	note curnote;
