@@ -36,8 +36,7 @@ typedef struct {
 typedef struct {
 	period_t period; //in usecs
 	volume_t volume;
-	ucounter_t volume_accuracy; //in 1/samplerate points
-	period_t period_accuracy; //in 1/samplerate points
+	ucounter_t accuracy; //in 1/samplerate points
 	errno_t notactual;
 } sensor_value;
 

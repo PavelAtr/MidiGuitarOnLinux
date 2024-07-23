@@ -32,7 +32,7 @@ int main(int argc, char** argv)
 		
 		#ifdef DEBUGRAW
 		if (!sensvalue.notactual && sensvalue.volume > VOLUME_NOISE)
-			printf("RMS=%d\tperiod=%d\tvol_accuracy=%d\tperiod_accuracy=%d\n", sensvalue.volume, sensvalue.period, sensvalue.volume_accuracy, sensvalue.period_accuracy);
+			printf("RMS=%d\tperiod=%d\taccuracy=%d\taccuracy=%d\n", sensvalue.volume, sensvalue.period, sensvalue.accuracy);
 		#endif
 		
 		perform_freqvol(&sensvalue, &struna1);

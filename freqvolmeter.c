@@ -79,10 +79,9 @@ void freqvolmeter_init()
 sensor_value* read_sensor(sensor* sens, sensor_value* buf)
 {
 		semaphore_wait(sem);
-		buf->period = sens->cur - sens->prev;
-		buf->period_accuracy = buf->period;
+		buf->period =  (sens->accuracy != 0)? (sens->cur - sens->prev) / sens->accuracy : 0;
 		buf->period = buf->period * 1000000 / samplerate;
-		buf->volume_accuracy = sens->accuracy;
+		buf->accuracy = sens->accuracy;
 		buf->volume = (sens->accuracy != 0)? sens->volume / sens->accuracy : 0;
 		buf->notactual = 0;
 		if (samplecounter - sens->prev > PERIOD_TIMEOUT)
