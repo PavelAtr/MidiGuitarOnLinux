@@ -20,8 +20,8 @@ void adcprocess()
 	sensor* s = &sens;
 	for (jack_nframes_t i = 0; i < ports_nframes; i++)
 	{
-		volume_t ADC_voltage = ADC_MAX * inputbuf[i];
-		s->volume_tmp += (ADC_voltage > ADC_ZERO_SIN)? ADC_voltage - ADC_ZERO_SIN : ADC_ZERO_SIN - ADC_voltage;
+		volume_t ADC_voltage = ADC_MAX * inputbuf[i] -ADC_ZERO_SIN;
+		s->volume_tmp += abs(ADC_voltage);
 		s->accuracy_tmp++;
 		s->samplecounter++;
 
