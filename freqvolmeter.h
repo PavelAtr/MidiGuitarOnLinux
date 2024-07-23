@@ -11,6 +11,7 @@
 #define ADC_MAX_SIN ADC_MAX
 #define ADC_MAX_RMS (ADC_MAX * 0.638)
 #define VOLUME_NOISE 100
+#define SUSTAIN_FACTOR 0.8
 
 
 typedef struct {
@@ -29,7 +30,6 @@ typedef struct {
 	ucounter_t accuracy_tmp;
 	ucounter_t period_divider_tmp;
 	ulongcounter_t period_volume_last;
-	ulongcounter_t period_volume_single_last;
 	flag_short_t comparator_zero;
 	flag_short_t comparator_max;
 	flag_short_t comparator_min;
