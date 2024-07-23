@@ -18,14 +18,18 @@ typedef struct {
 	ucounter_t accuracy; //in 1/samplerate points
 	ulongcounter_t prev;
 	ulongcounter_t cur;
+	ulongcounter_t prev_single;
+	ulongcounter_t cur_single;
 	ucounter_t period_divider;
+	flag_short_t ready;
 	
 	volume_t period_volume_max;
 	volume_t period_volume_min;
 	volume_long_t volume_tmp;
 	ucounter_t accuracy_tmp;
 	ucounter_t period_divider_tmp;
-	ulongcounter_t period_volume_max_last;
+	ulongcounter_t period_volume_last;
+	ulongcounter_t period_volume_single_last;
 	flag_short_t comparator_zero;
 	flag_short_t comparator_max;
 	flag_short_t comparator_min;

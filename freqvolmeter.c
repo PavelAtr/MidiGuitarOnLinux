@@ -31,10 +31,14 @@ void adcprocess()
 			sens.comparator_min = 1;
 			if (sens.comparator_max)
 			{
+				sens.period_volume_single_last = samplecounter;
 				sens.comparator_max = 0;
 				sens.period_divider_tmp++;
 				if (sens.accuracy_tmp > PERIOD_ACCURACY_MIN)
-					sens.period_volume_max_last = samplecounter;
+				{
+					sens.ready = 1;
+					sens.period_volume_last = samplecounter;
+				}
 			}
 		}
 		if (ADC_voltage < sens.period_volume_min)
@@ -43,11 +47,14 @@ void adcprocess()
 			sens.comparator_max = 1;
 			if (sens.comparator_min)
 			{
-				if (sens.accuracy_tmp > PERIOD_ACCURACY_MIN)
+				sens.comparator_min = 0;
+				sens.prev_single = sens.cur_single;
+				sens.cur_single = sens.period_volume_single_last;
+				if (sens.ready)
 				{
-					sens.comparator_min = 0;
+					sens.ready = 0;
 					sens.prev = sens.cur;
-					sens.cur = sens.period_volume_max_last;
+					sens.cur = sens.period_volume_last;
 					sens.volume = sens.volume_tmp;
 					sens.accuracy = sens.accuracy_tmp;
 					sens.period_divider = sens.period_divider_tmp;
@@ -79,7 +86,7 @@ void freqvolmeter_init()
 sensor_value* read_sensor(sensor* sens, sensor_value* buf)
 {
 		semaphore_wait(sem);
-		buf->period =  (sens->accuracy != 0)? (sens->cur - sens->prev) / sens->accuracy : 0;
+		buf->period =  (sens->period_divider != 0)? (sens->cur - sens->prev) / sens->period_divider : 0;
 		buf->period = buf->period * 1000000 / samplerate;
 		buf->accuracy = sens->accuracy;
 		buf->volume = (sens->accuracy != 0)? sens->volume / sens->accuracy : 0;
