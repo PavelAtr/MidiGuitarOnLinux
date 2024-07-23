@@ -25,6 +25,14 @@ void adcprocess()
 		s->accuracy_tmp++;
 		s->samplecounter++;
 
+		if (ADC_voltage > ADC_ZERO_SIN)
+			s->comparator_zero = 1;
+		else if (sens.comparator_zero)
+		{
+			s->comparator_zero = 0;
+			s->period_volume_max = SUSTAIN_FACTOR * s->period_volume_max;
+			s->period_volume_min = SUSTAIN_FACTOR * s->period_volume_min;
+		}
 		if (ADC_voltage > sens.period_volume_max)
 		{
 			s->period_volume_max = ADC_voltage;
@@ -60,14 +68,6 @@ void adcprocess()
 					s->period_divider_tmp = 0;
 				}
 			}
-		}
-		if (ADC_voltage > ADC_ZERO_SIN)
-			s->comparator_zero = 1;
-		else if (sens.comparator_zero)
-		{
-			s->comparator_zero = 0;
-			s->period_volume_max = SUSTAIN_FACTOR * s->period_volume_max;
-			s->period_volume_min = SUSTAIN_FACTOR * s->period_volume_min;
 		}
 	}
 	semaphore_post(sem);
