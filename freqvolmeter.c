@@ -43,7 +43,6 @@ void adcprocess()
 			if (sens.comparator_min)
 			{
 				sens.comparator_min = 0;
-
 				sens.volume = sens.volume_tmp;
 				sens.accuracy = sens.accuracy_tmp;
 				sens.volume_tmp = 0;
@@ -53,7 +52,8 @@ void adcprocess()
 				sens.measurment_time++;
 			}
 		}
-		if (!(ADC_voltage > ADC_ZERO_SIN) && sens.comparator_zero)
+//		if (!(ADC_voltage > ADC_ZERO_SIN) && sens.comparator_zero)
+		if (abs(ADC_voltage) < VOLUME_NOISE && sens.comparator_zero)
 		{
 			sens.comparator_zero = 0;
 			sens.period_volume_min = 0.8 * sens.period_volume_min;

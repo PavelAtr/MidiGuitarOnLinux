@@ -10,7 +10,7 @@
 #define ADC_ZERO_SIN 0
 #define ADC_MAX_SIN ADC_MAX
 #define ADC_MAX_RMS (ADC_MAX * 0.638)
-#define VOLUME_NOISE 100 	
+#define VOLUME_NOISE 100
 
 #define MEASURMENT_TIME 2 //In signal periods
 
