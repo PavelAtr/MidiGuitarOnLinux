@@ -12,7 +12,7 @@
 semaphore_t sem = 0;
 
 sensor sens;
-samplecount_t samplecounter = 0;
+ulongcounter_t samplecounter = 0;
 ucounter_t PERIOD_ACCURACY_MIN;
 
 void adcprocess()
