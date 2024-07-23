@@ -31,13 +31,16 @@ void adcprocess()
 		{
 			sens.period_volume_max_last = samplecounter;
 			sens.period_volume_max = ADC_voltage;
+			sens.comparator = 1;
 		}
 //		if (ADC_voltage < sens.period_volume_min)
 //		{
 //			sens.period_volume_min = ADC_voltage;
 //		}
 		if (ADC_voltage > ADC_ZERO_SIN)
-			sens.comparator = 1;
+		{
+			
+		}
 		else if (sens.comparator)
 		{
 			sens.comparator = 0;
