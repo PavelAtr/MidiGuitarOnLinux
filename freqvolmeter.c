@@ -73,8 +73,8 @@ sensor_value* read_sensor(sensor* sens, sensor_value* buf)
 		buf->volume_accuracy = sens->accuracy;
 		buf->volume = (sens->accuracy != 0)? sens->volume / sens->accuracy : 0;
 		buf->notactual = 0;
-//		if (samplecounter - sens->prev > PERIOD_TIMEOUT)
-//			buf->notactual =  ETIMEOUT;
+		if (samplecounter - sens->prev > PERIOD_TIMEOUT)
+			buf->notactual =  ETIMEOUT;
 		if (buf->period > PERIOD_MAX || buf->period <= PERIOD_MIN)
 			buf->notactual =  EDIRTY;
 		semaphore_post(sem);
