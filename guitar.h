@@ -13,6 +13,7 @@ typedef struct {
 	} note;
 
 typedef struct {
+	volume_t curvolume;
 	flag_short_t flags;
 	note oldnote;
 	note curnote;
@@ -35,6 +36,7 @@ typedef struct {
 #define PITCH_TRESHOLD 70 //in percent 200% = 2 semitone
 #define PITCH_STEP 10 // in percent 200% = 2 semitone
 #define VOLUME_MAX 10000
+#define VOLUME_NEW_TRESHOLD VOLUME_MAX * 0.1
 
 
 

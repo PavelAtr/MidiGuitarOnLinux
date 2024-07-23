@@ -73,8 +73,14 @@ byte_t normalize_velocity(int volume)
 
 void perform_freqvol(sensor_value* sensvalue, struna* str)
 {
-	if (sensvalue->notactual || sensvalue->volume < VOLUME_NOISE)
+	if (sensvalue->notactual)
 	{
+		str->curvolume = sensvalue->volume;
+	}
+	
+	if (sensvalue->volume < VOLUME_NOISE)
+	{
+		str->curvolume = sensvalue->volume;
 		if (!(str->flags & NOTE_SILENCE))
 		{
 			note_copy(&str->oldnote, &str->curnote);
@@ -90,8 +96,10 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 	
 	if (str->newnote.index == -1) return;
 	
-	flags |= (str->flags & NOTE_SILENCE) ? NOTE_NEW : 0;
-	flags |= (abs(str->curnote.bend) < PITCH_TRESHOLD && str->newnote.index != str->curnote.index) ? NOTE_NEW : 0;
+	flags |= (str->curvolume + VOLUME_NEW_TRESHOLD < sensvalue->volume) ? NOTE_NEW : 0;
+	str->curvolume = sensvalue->volume;
+//	flags |= (str->flags & NOTE_SILENCE) ? NOTE_NEW : 0;
+//	flags |= (abs(str->curnote.bend) < PITCH_TRESHOLD && str->newnote.index != str->curnote.index) ? NOTE_NEW : 0;
 	
 	if (flags & NOTE_NEW)
 	{

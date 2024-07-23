@@ -38,7 +38,7 @@ int main(int argc, char** argv)
 		perform_freqvol(&sensvalue, &struna1);
 		perform_send();
 		
-		usleep(4000);
+		usleep(100);
 	}
 	return 0;
 }

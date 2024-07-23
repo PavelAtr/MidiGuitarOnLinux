@@ -13,6 +13,7 @@ semaphore_t sem = 0;
 
 sensor sens;
 samplecount_t samplecounter = 0;
+samplecount_t period_timeout_samples = 0;
 
 
 
@@ -64,6 +65,7 @@ void freqvolmeter_init()
 {
 	extern_process = &adcprocess;
 	memset(&sens, 0x0, sizeof(sens));
+	period_timeout_samples = 1000000 / samplerate * PERIOD_TIMEOUT;
 }
 
 sensor_value* read_sensor(sensor* sens, sensor_value* buf)
@@ -75,8 +77,8 @@ sensor_value* read_sensor(sensor* sens, sensor_value* buf)
 		buf->volume_accuracy = sens->accuracy;
 		buf->volume = (sens->accuracy != 0)? sens->volume / sens->accuracy : 0;
 		buf->notactual = 0;
-//		if ((samplecounter - sens->cur) * 1000000 / samplerate > PERIOD_TIMEOUT)
-//			buf->notactual =  ETIMEOUT;
+		if ((samplecounter - sens->prev) > period_timeout_samples)
+			buf->notactual =  ETIMEOUT;
 		if (buf->period > PERIOD_TIMEOUT || buf->period <= PERIOD_MIN)
 			buf->notactual =  EDIRTY;
 		semaphore_post(sem);
