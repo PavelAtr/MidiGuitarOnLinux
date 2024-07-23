@@ -24,6 +24,7 @@ typedef struct {
 	ucounter_t period_divider;
 	flag_short_t ready;
 	
+	ulongcounter_t samplecounter;
 	volume_t period_volume_max;
 	volume_t period_volume_min;
 	volume_long_t volume_tmp;
