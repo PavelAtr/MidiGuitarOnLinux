@@ -34,7 +34,7 @@ typedef struct {
 #define PITCH_MIN -200 //in percent
 #define PITCH_TRESHOLD 70 //in percent 200% = 2 semitone
 #define PITCH_STEP 10 // in percent 200% = 2 semitone
-#define VOLUME_MAX 50000
+#define VOLUME_MAX 10000
 
 
 

@@ -73,7 +73,7 @@ byte_t normalize_velocity(int volume)
 
 void perform_freqvol(sensor_value* sensvalue, struna* str)
 {
-	if (sensvalue->notactual == ETIMEOUT || sensvalue->notactual == EDIRTY || sensvalue->volume < VOLUME_NOISE)
+	if (sensvalue->notactual || sensvalue->volume < VOLUME_NOISE)
 	{
 		if (!(str->flags & NOTE_SILENCE))
 		{
@@ -98,7 +98,7 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 		note_copy(&str->oldnote, &str->curnote);
 		note_copy(&str->curnote, &str->newnote);
 		str->curnote.volume = sensvalue->volume;
-		str->curnote.accuracy = sensvalue->accuracy;
+		str->curnote.accuracy = sensvalue->period_accuracy;
 		str->flags |= NOTE_NEW;
 		if (!(str->flags & NOTE_SILENCE))
 			str->flags |= NOTE_END;

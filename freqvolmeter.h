@@ -13,8 +13,15 @@
 
 typedef struct {
 	volume_long_t volume;
-	ucounter_t measurments; //in 1/samplerate points
-	period_t period; //in 1/samplerate points
+	ucounter_t accuracy; //in 1/samplerate points
+	samplecount_t prev;
+	samplecount_t cur;
+	
+	volume_t period_volume_max;
+	volume_t period_volume_min;
+	volume_long_t volume_tmp;
+	ucounter_t accuracy_tmp;
+	samplecount_t period_volume_max_last;
 	flag_short_t comparator;
 } sensor;
 
@@ -23,7 +30,8 @@ typedef struct {
 typedef struct {
 	period_t period; //in usecs
 	volume_t volume;
-	ucounter_t accuracy; //in 1/samplerate points
+	ucounter_t volume_accuracy; //in 1/samplerate points
+	period_t period_accuracy; //in 1/samplerate points
 	errno_t notactual;
 } sensor_value;
 
