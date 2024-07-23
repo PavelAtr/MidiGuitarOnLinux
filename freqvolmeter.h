@@ -3,7 +3,7 @@
 #include "main.h"
 #include "jack.h"
 
-#define PERIOD_TIMEOUT 40000
+#define PERIOD_MAX 40000
 #define PERIOD_MIN 200
 #define ADC_MAX 0xFFFF
 #define ADC_ZERO_SIN 0
