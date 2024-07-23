@@ -73,10 +73,8 @@ byte_t normalize_velocity(int volume)
 
 void perform_freqvol(sensor_value* sensvalue, struna* str)
 {
-	if (sensvalue->notactual)
-	{
-		str->curvolume = sensvalue->volume;
-	}
+	str->curvolume = sensvalue->volume;
+	if (sensvalue->errors) return;
 	
 	if (sensvalue->volume < VOLUME_NOISE)
 	{

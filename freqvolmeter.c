@@ -87,11 +87,11 @@ sensor_value* read_sensor(sensor* sens, sensor_value* buf)
 		buf->period = buf->period * 1000000 / samplerate;
 		buf->accuracy = sens->accuracy;
 		buf->volume = (sens->accuracy != 0)? sens->volume / sens->accuracy : 0;
-		buf->notactual = 0;
+		buf->errors = 0;
 		if (sens->samplecounter - sens->prev > PERIOD_TIMEOUT)
-			buf->notactual =  ETIMEOUT;
+			buf->errors =  ETIMEOUT;
 		if (buf->period > PERIOD_MAX || buf->period <= PERIOD_MIN)
-			buf->notactual =  EDIRTY;
+			buf->errors =  EDIRTY;
 		semaphore_post(sem);
 		
 		return buf;
