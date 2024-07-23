@@ -40,6 +40,7 @@ typedef struct {
 #define EDIRTY 2
 typedef struct {
 	period_t period; //in usecs
+	period_t period_single;
 	volume_t volume;
 	ucounter_t accuracy; //in 1/samplerate points
 	errno_t errors;

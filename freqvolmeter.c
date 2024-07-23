@@ -84,7 +84,8 @@ sensor_value* read_sensor(sensor* sens, sensor_value* buf)
 {
 		semaphore_wait(sem);
 		buf->period =  (sens->period_divider > 1)? (sens->cur - sens->prev) / (sens->period_divider - 1) : 0;
-		buf->period = buf->period * 1000000 / samplerate;
+		buf->period_single = sens->cur_single - sens->prev_single;
+//		buf->period = buf->period * 1000000 / samplerate;
 		buf->accuracy = sens->accuracy;
 		buf->volume = (sens->accuracy != 0)? sens->volume / sens->accuracy : 0;
 		buf->errors = 0;
