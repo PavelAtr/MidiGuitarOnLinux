@@ -29,16 +29,14 @@ void adcprocess()
 		{
 			sens.period_volume_max = ADC_voltage;
 			sens.comparator_min = 1;
+			sens.period_volume_last = samplecounter;
+			sens.period_volume_single_last = samplecounter;
 			if (sens.comparator_max)
 			{
-				sens.period_volume_single_last = samplecounter;
 				sens.comparator_max = 0;
 				sens.period_divider_tmp++;
 				if (sens.accuracy_tmp > PERIOD_ACCURACY_MIN)
-				{
 					sens.ready = 1;
-					sens.period_volume_last = samplecounter;
-				}
 			}
 		}
 		if (ADC_voltage < sens.period_volume_min)
