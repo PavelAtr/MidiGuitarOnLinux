@@ -25,6 +25,7 @@ int main(int argc, char** argv)
 {
 	jack_init();
 	freqvolmeter_init();
+	guitar_init();
 	while(1) 
 	{
 		sensor_value sensvalue1;
