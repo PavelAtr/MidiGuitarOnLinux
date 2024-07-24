@@ -41,7 +41,7 @@ typedef struct {
 #define PITCH_TRESHOLD 30 // in %, note pitched and not be slided
 #define PITCH_STEP 10 // in %, to reduce event count
 #define VOLUME_MAX 10000
-#define VOLUME_NEW_TRESHOLD VOLUME_MAX * 0.015
+#define VOLUME_NEW_TRESHOLD VOLUME_MAX * 0.07
 
 
 

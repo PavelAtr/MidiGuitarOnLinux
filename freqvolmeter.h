@@ -40,7 +40,6 @@ typedef struct {
 
 typedef struct {
 	period_t period; //in usecs
-	period_t period_single;
 	volume_t volume;
 	ucounter_t serialno;
 	ucounter_t accuracy; //in samplerate points
