@@ -8,5 +8,5 @@ clean:
 	rm -f MidiGuitarOnLinux
 	
 install:
-	install MidiGuitarOnLinux $(PREFIX)/bin/MidiGuitarOnLinux
+	install MidiGuitarOnLinux $(DESTDIR)/$(PREFIX)/bin/MidiGuitarOnLinux
 
