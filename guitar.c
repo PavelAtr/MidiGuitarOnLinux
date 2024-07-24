@@ -91,36 +91,40 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 	
 	if (sensvalue->volume < VOLUME_NOISE)
 	{
-		str->curvolume = sensvalue->volume;
+		// End note by volume
 		if (!(str->flags & NOTE_SILENCE))
 		{
 			note_copy(&str->oldnote, &str->curnote);
 			str->flags |= NOTE_END;
 		}
+		// Nothing else
 		return;
 	}
 	
 	flag_short_t flags = 0;
 
+	// Searching note in array frequencys
 	str->newnote.period = sensvalue->period;
 	search_note(&str->newnote);
 	
 	if (str->newnote.index == -1) return;
 	
+	// New note is louder
 	flags |= (str->oldvolume + VOLUME_NEW_TRESHOLD < str->curvolume) ? NOTE_NEW : 0;
+	// Frequency after silence
 	flags |= (str->flags & NOTE_SILENCE) ? NOTE_NEW : 0;
 	if (str->newnote.index == str->curnote.index)
 	{
-		//Note same
+	// Note same
 		if (abs(str->curnote.bend - str->newnote.bend) >= PITCH_STEP)
 		{
-			// if diff >= PITCH_STEP, newpitch
+		// if diff >= PITCH_STEP, newpitch
 			str->curnote.bend = str->newnote.bend;
 			flags |= NOTE_NEWPITCH;
 		}
 	} else if (abs(str->curnote.bend) < PITCH_TRESHOLD)
 	{
-		// Note not pitched, slide
+	// Note not pitched, slide
 		flags |= NOTE_NEW;
 	} else
 	{
