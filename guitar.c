@@ -95,8 +95,8 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 	if (str->newnote.index == -1) return;
 	
 	flags |= (str->oldvolume + VOLUME_NEW_TRESHOLD < str->curvolume) ? NOTE_NEW : 0;
-//	flags |= (str->flags & NOTE_SILENCE) ? NOTE_NEW : 0;
-//	flags |= (abs(str->curnote.bend) < PITCH_TRESHOLD && str->newnote.index != str->curnote.index) ? NOTE_NEW : 0;
+	flags |= (str->flags & NOTE_SILENCE) ? NOTE_NEW : 0;
+	flags |= (abs(str->curnote.bend) < PITCH_TRESHOLD && str->newnote.index != str->curnote.index) ? NOTE_NEW : 0;
 	
 	if (flags & NOTE_NEW)
 	{
@@ -151,18 +151,11 @@ void perform_send(struna* str)
 		#endif
 		
 		#ifdef DEBUGMIDI
-		printf("chn=%d PITCHNEW=%d MSB=%d LSB=%d\r\n", str->channel str->curnote.bend, tmppitch.MSB, tmppitch.LSB);
+		printf("chn=%d PITCHNEW=%d MSB=%d LSB=%d\r\n", str->channel, str->curnote.bend, tmppitch.bendMSB, tmppitch.bendLSB);
 		#endif
 		
 		str->flags &= ~NOTE_NEWPITCH;
 	}
-
-
-	#ifdef DEBUGMIDI
-	//normalize_pitch(&tmppitch, str->newnote.bend);
-	//printf("%d STR1 PITCH=%d REA=%d MSB=%d LSB=%d\r\n", str->newnote.index, str->newnote.bend, tmppitch.realpitch, tmppitch.bendMSB, tmppitch.bendLSB);
-	
-	#endif
 }
 
 void guitar_init()
