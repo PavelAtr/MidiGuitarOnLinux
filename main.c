@@ -27,15 +27,19 @@ int main(int argc, char** argv)
 	freqvolmeter_init();
 	while(1) 
 	{
-		sensor_value sensvalue;
-		read_sensor(&sens, &sensvalue);
+		sensor_value sensvalue1;
+		read_sensor(&sens, &sensvalue1);
 		
 		#ifdef DEBUGRAW
-		if (!sensvalue.errors && sensvalue.volume > VOLUME_NOISE)
-			printf("RMS=%d\tperiod_single=%d\tperiod=%d\tperiod_sampl=%d\tdivider=%d\taccuracy=%d\n", sensvalue.volume, sensvalue.period_single, sensvalue.period, sensvalue.period_sampl, sensvalue.divider, sensvalue.accuracy);
+		if (!sensvalue1.errors && sensvalue1.volume > VOLUME_NOISE)
+			printf("RMS=%d\tperiod_single=%d\tperiod=%d\t\
+period_sampl=%d\tdivider=%d\taccuracy=%d\n",
+				sensvalue1.volume, sensvalue1.period_single,
+				sensvalue1.period, sensvalue1.period_sampl,
+				sensvalue1.divider, sensvalue1.accuracy);
 		#endif
 		
-		perform_freqvol(&sensvalue, &struna1);
+		perform_freqvol(&sensvalue1, &struna1);
 		perform_send(&struna1);
 		
 		usleep(100);
