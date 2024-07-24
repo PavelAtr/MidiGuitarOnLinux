@@ -27,6 +27,17 @@ note* search_pitch(note* inp)
 	return inp;
 }
 
+pitch_t calc_related_pitch(note* start, note* end)
+{
+	pitch_t ret = 0;
+	ret = (start->index <= end->index) ?
+		(end->index - start->index) * 100 + end->bend :
+		(start->index - end->index) * 100 - end->bend;
+	ret = (ret > PITCH_MAX)	? PITCH_MAX : ret;
+	ret = (ret < PITCH_MIN)	? PITCH_MIN : ret;
+
+}
+
 note* search_note(note* inp)
 {
 	for (int i = 0; i < NUMNOTES - 1; i++)
@@ -38,9 +49,7 @@ note* search_note(note* inp)
 			return inp;
 		}
 	}
-	
 	inp->index = -1;
-	
 	return inp;
 }
 
