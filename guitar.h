@@ -16,6 +16,7 @@ typedef struct {
 	volume_t curvolume;
 	volume_t oldvolume;
 	byte_t channel;
+	ucounter_t serialno;
 	flag_short_t flags;
 	note oldnote;
 	note curnote;

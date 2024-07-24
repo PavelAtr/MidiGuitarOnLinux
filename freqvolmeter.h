@@ -23,6 +23,7 @@ typedef struct {
 	ulongcounter_t prev_single;
 	ulongcounter_t cur_single;
 	ucounter_t period_divider;
+	ucounter_t serialno;
 	flag_short_t ready;
 	
 	ulongcounter_t samplecounter;
@@ -43,6 +44,7 @@ typedef struct {
 	ucounter_t divider;
 	period_t period_single;
 	volume_t volume;
+	ucounter_t serialno;
 	ucounter_t accuracy; //in 1/samplerate points
 	errno_t errors;
 } sensor_value;

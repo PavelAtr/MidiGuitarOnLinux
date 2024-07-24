@@ -72,6 +72,10 @@ byte_t normalize_velocity(int volume)
 
 void perform_freqvol(sensor_value* sensvalue, struna* str)
 {
+	if (sensvalue->serialno == str->serialno)
+		return;
+	else str->serialno = sensvalue->serialno;
+	
 	str->oldvolume = str->curvolume;
 	str->curvolume = sensvalue->volume;
 	if (sensvalue->errors) return;

@@ -58,6 +58,7 @@ void adcprocess()
 				if (s->ready)
 				{
 					s->ready = 0;
+					s->serialno++;
 					s->prev = s->cur;
 					s->cur = s->period_volume_last;
 					s->volume = s->volume_tmp;
@@ -89,6 +90,7 @@ sensor_value* read_sensor(sensor* sens, sensor_value* buf)
 		buf->volume = (sens->accuracy != 0)? sens->volume / sens->accuracy : 0;
 		buf->accuracy = sens->accuracy;
 		buf->divider = sens->period_divider;
+		buf->serialno = sens->serialno;
 		buf->errors = 0;
 		if (buf->period != 0)
 			if ((buf->period - buf->period_single) * 100 / buf->period >= PERIOD_ACCURACY_DIFF)	
