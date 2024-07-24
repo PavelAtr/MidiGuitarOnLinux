@@ -161,7 +161,7 @@ void perform_send(struna* str)
 	if (str->flags & NOTE_END)
 	{
 		#ifdef REALMIDI				
-		midiNoteOffOut(str->oldnote.index + STARTNOTE,
+		midiNoteOffOut(str->oldnote.index + STARTMIDINOTE,
 			normalize_velocity(str->oldnote.volume), str->channel);
 		#endif
 		
@@ -178,7 +178,7 @@ void perform_send(struna* str)
 	if (str->flags & NOTE_NEW)
 	{
 		#ifdef REALMIDI
-		midiNoteOnOut(str->curnote.index  + STARTNOTE,
+		midiNoteOnOut(str->curnote.index  + STARTMIDINOTE,
 			normalize_velocity(str->curnote.volume), str->channel);
 		#endif
 		
