@@ -35,7 +35,7 @@ pitch_t calc_related_pitch(note* start, note* end)
 		(start->index - end->index) * 100 - end->bend;
 	ret = (ret > PITCH_MAX)	? PITCH_MAX : ret;
 	ret = (ret < PITCH_MIN)	? PITCH_MIN : ret;
-
+	return ret;
 }
 
 note* search_note(note* inp)
