@@ -159,12 +159,16 @@ void perform_send(struna* str)
 	{
 		normalize_pitch(&tmppitch, str->curnote.bend);
 		
-		#ifdef REALMIDI		
+		#ifdef REALMIDI	
+		#ifdef ENABLE_BENDS	
 		midiPitchBendOut(tmppitch.bendLSB, tmppitch.bendMSB, str->channel);
+		#endif
 		#endif
 		
 		#ifdef DEBUGMIDI
+		#ifdef ENABLE_BENDS	
 		printf("chn=%d PITCHNEW=%d MSB=%d LSB=%d\r\n", str->channel, str->curnote.bend, tmppitch.bendMSB, tmppitch.bendLSB);
+		#endif
 		#endif
 		
 		str->flags &= ~NOTE_NEWPITCH;

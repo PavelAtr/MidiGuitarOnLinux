@@ -18,6 +18,7 @@ typedef unsigned char errno_t;
 
 #define DEBUGMIDI
 #define REALMIDI
+#define ENABLE_BENDS
 //#define DEBUGRAW
 
 

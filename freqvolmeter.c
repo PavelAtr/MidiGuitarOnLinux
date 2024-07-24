@@ -77,7 +77,7 @@ void adcprocess()
 void freqvolmeter_init()
 {
 	extern_process = &adcprocess;
-	PERIOD_ACCURACY_MIN = ports_nframes * 2;
+	PERIOD_ACCURACY_MIN = ports_nframes;
 	memset(&sens, 0x0, sizeof(sens));
 }
 
