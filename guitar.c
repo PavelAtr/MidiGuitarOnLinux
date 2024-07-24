@@ -109,7 +109,30 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 	
 	flags |= (str->oldvolume + VOLUME_NEW_TRESHOLD < str->curvolume) ? NOTE_NEW : 0;
 	flags |= (str->flags & NOTE_SILENCE) ? NOTE_NEW : 0;
-	flags |= (abs(str->curnote.bend) < PITCH_TRESHOLD && str->newnote.index != str->curnote.index) ? NOTE_NEW : 0;
+	if (str->newnote.index == str->curnote.index)
+	{
+		//Note same
+		if (abs(str->curnote.bend - str->newnote.bend) >= PITCH_STEP)
+		{
+			// if diff >= PITCH_STEP, newpitch
+			str->curnote.bend = str->newnote.bend;
+			flags |= NOTE_NEWPITCH;
+		}
+	} else if (abs(str->curnote.bend) < PITCH_TRESHOLD)
+	{
+		// Note not pitched, slide
+		flags |= NOTE_NEW;
+	} else
+	{
+		//Note pitched
+		pitch_t newpitch = calc_related_pitch(&str->curnote, &str->newnote);
+		if (abs(str->curnote.bend - newpitch) >= PITCH_STEP)
+		{
+			// if diff >= PITCH_STEP, newpitch
+			str->curnote.bend = newpitch;
+			flags |= NOTE_NEWPITCH;
+		}
+	}
 	
 	if (flags & NOTE_NEW)
 	{
@@ -121,6 +144,8 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 		if (!(str->flags & NOTE_SILENCE))
 			str->flags |= NOTE_END;
 	}
+	if (flags & NOTE_NEWPITCH)
+		str->flags |= NOTE_NEWPITCH;
 }
 
 char tmp[30];
