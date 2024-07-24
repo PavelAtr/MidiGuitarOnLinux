@@ -44,8 +44,9 @@ typedef struct {
 
 extern struna struna1;
 
+void guitar_init();
 void perform_freqvol(sensor_value* sensvalue, struna* str);
-void perform_send();
+void perform_send(struna* str);
 
 extern struna struna1;
 

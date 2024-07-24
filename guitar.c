@@ -164,3 +164,8 @@ void perform_send(struna* str)
 	
 	#endif
 }
+
+void guitar_init()
+{
+	struna1.channel = CHANNEL1;
+}

@@ -36,7 +36,7 @@ int main(int argc, char** argv)
 		#endif
 		
 		perform_freqvol(&sensvalue, &struna1);
-		perform_send();
+		perform_send(&struna1);
 		
 		usleep(100);
 	}
