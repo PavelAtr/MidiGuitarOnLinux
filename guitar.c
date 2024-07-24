@@ -161,11 +161,15 @@ void perform_send(struna* str)
 	if (str->flags & NOTE_END)
 	{
 		#ifdef REALMIDI				
-		midiNoteOffOut(str->oldnote.index + STARTNOTE, normalize_velocity(str->oldnote.volume), str->channel);
+		midiNoteOffOut(str->oldnote.index + STARTNOTE,
+			normalize_velocity(str->oldnote.volume), str->channel);
 		#endif
 		
 		#ifdef DEBUGMIDI
-		printf("chn=%d note END=%d vel=%d per=%d\r\n", str->channel, str->oldnote.index, normalize_velocity(str->oldnote.volume), str->oldnote.period);
+		printf("chn=%d note END=%d velocity=%d period=%d\r\n",
+			str->channel, str->oldnote.index,
+			normalize_velocity(str->oldnote.volume),
+			str->oldnote.period);
 		#endif
 		
 		str->flags &= ~NOTE_END;
@@ -174,11 +178,15 @@ void perform_send(struna* str)
 	if (str->flags & NOTE_NEW)
 	{
 		#ifdef REALMIDI
-		midiNoteOnOut(str->curnote.index  + STARTNOTE, normalize_velocity(str->curnote.volume), str->channel);
+		midiNoteOnOut(str->curnote.index  + STARTNOTE,
+			normalize_velocity(str->curnote.volume), str->channel);
 		#endif
 		
 		#ifdef DEBUGMIDI
-		printf("chn%d note NEW=%d vel=%d per=%d acc=%d vol=%d\r\n", str->channel, str->curnote.index, normalize_velocity(str->curnote.volume), str->curnote.period, str->curnote.accuracy, str->curnote.volume);
+		printf("chn%d note NEW=%d velocity=%d period=%d accuracy=%d\r\n",
+			str->channel, str->curnote.index,
+			normalize_velocity(str->curnote.volume),
+			str->curnote.period, str->curnote.accuracy);
 		#endif
 
 		str->flags &= ~NOTE_NEW;
@@ -196,7 +204,9 @@ void perform_send(struna* str)
 		
 		#ifdef DEBUGMIDI
 		#ifdef ENABLE_BENDS	
-		printf("chn=%d PITCHNEW=%d MSB=%d LSB=%d\r\n", str->channel, str->curnote.bend, tmppitch.bendMSB, tmppitch.bendLSB);
+		printf("chn=%d PITCHNEW=%d MSB=%d LSB=%d\r\n",
+			str->channel, str->curnote.bend,
+			tmppitch.bendMSB, tmppitch.bendLSB);
 		#endif
 		#endif
 		
