@@ -16,11 +16,11 @@ ucounter_t PERIOD_ACCURACY_MIN;
 
 void adcprocess()
 {
-	semaphore_waitnosleep(sem);
 	sensor* s = &sens;
 	for (jack_nframes_t i = 0; i < ports_nframes; i++)
 	{
 		volume_t ADC_voltage = ADC_MAX * inputbuf[i] -ADC_ZERO_SIN;
+		semaphore_waitnosleep(sem);
 		s->volume_tmp += abs(ADC_voltage);
 		s->accuracy_tmp++;
 		s->samplecounter++;
@@ -69,8 +69,8 @@ void adcprocess()
 				}
 			}
 		}
+		semaphore_post(sem);
 	}
-	semaphore_post(sem);
 }
 
 void freqvolmeter_init()
@@ -85,14 +85,14 @@ sensor_value* read_sensor(sensor* sens, sensor_value* buf)
 		semaphore_wait(sem);
 		buf->period =  (sens->period_divider > 1)? (sens->cur - sens->prev) / (sens->period_divider - 1) : 0;
 		buf->period_single = sens->cur_single - sens->prev_single;
-//		buf->period = buf->period * 1000000 / samplerate;
-		buf->accuracy = sens->accuracy;
 		buf->volume = (sens->accuracy != 0)? sens->volume / sens->accuracy : 0;
+		buf->accuracy = sens->accuracy;
 		buf->errors = 0;
 		if (sens->samplecounter - sens->prev > PERIOD_TIMEOUT)
 			buf->errors =  ETIMEOUT;
 		if (buf->period > PERIOD_MAX || buf->period <= PERIOD_MIN)
 			buf->errors =  EDIRTY;
+		//buf->period = buf->period * 1000000 / samplerate;
 		semaphore_post(sem);
 		
 		return buf;

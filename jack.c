@@ -15,7 +15,7 @@ jack_port_t* input_port;
 jack_port_t* midi_port;
 jack_client_t* client;
 
-unsigned int samplerate;
+unsigned int SAMPLERATE;
 jack_default_audio_sample_t* inputbuf;
 jack_nframes_t ports_nframes;
 semaphore_t midisem = 0;
@@ -98,7 +98,7 @@ void jack_init(void)
 	if (jack_activate (client))
 		error(EBUSY, EBUSY, "jack activate fail\n");
 	
-	samplerate = jack_get_sample_rate (client);
+	SAMPLERATE = jack_get_sample_rate (client);
 	ports_nframes = jack_get_buffer_size(client);
 	
 	midibuf = malloc(sizeof(char) * ports_nframes);

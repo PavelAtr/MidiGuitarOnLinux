@@ -10,7 +10,7 @@
 void jack_init(void);
 extern void (*extern_process)();
 
-extern unsigned int samplerate;
+extern unsigned int SAMPLERATE;
 extern jack_default_audio_sample_t* inputbuf;
 extern jack_nframes_t ports_nframes;
 
