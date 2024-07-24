@@ -34,10 +34,9 @@ int main(int argc, char** argv)
 		#ifdef DEBUGRAW
 		if (!sensvalue1.errors && sensvalue1.volume > VOLUME_NOISE)
 			printf("RMS=%d\tperiod_single=%d\tperiod=%d\t\
-period_sampl=%d\tdivider=%d\taccuracy=%d\n",
+\taccuracy=%d\n",
 				sensvalue1.volume, sensvalue1.period_single,
-				sensvalue1.period, sensvalue1.period_sampl,
-				sensvalue1.divider, sensvalue1.accuracy);
+				sensvalue1.period, sensvalue1.accuracy);
 		#endif
 		
 		perform_freqvol(&sensvalue1, &struna1);

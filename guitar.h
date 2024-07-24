@@ -23,6 +23,7 @@ typedef struct {
 	note newnote;
 	} struna;
 
+// flags:
 #define NOTE_NEW 0x01
 #define NOTE_END 0x02
 #define NOTE_NEWPITCH 0x04
@@ -34,10 +35,11 @@ typedef struct {
 	byte_t bendMSB;
 	} pitch;
 
-#define PITCH_MAX 200 //in % 0.5 tone = 100%
+// Constatnts:
+#define PITCH_MAX 200 //in %, 0.5 tone = 100%
 #define PITCH_MIN -200 //in %
-#define PITCH_TRESHOLD 30 // in % note pitched and not be slided
-#define PITCH_STEP 5 // in % 
+#define PITCH_TRESHOLD 30 // in %, note pitched and not be slided
+#define PITCH_STEP 10 // in %, to reduce event count
 #define VOLUME_MAX 10000
 #define VOLUME_NEW_TRESHOLD VOLUME_MAX * 0.015
 

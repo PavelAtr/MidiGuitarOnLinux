@@ -92,12 +92,14 @@ sensor_value* read_sensor(sensor* sens, sensor_value* buf)
 {
 		semaphore_wait(sem);
 		buf->period =  (sens->period_divider > 0)? (sens->cur - sens->prev) / (sens->period_divider) : 0;
-		buf->period_sampl = buf->period;
+//		buf->period_sampl = buf->period;
 		buf->period_single = sens->cur_single - sens->prev_single;
 		buf->volume = (sens->accuracy != 0)? sens->volume / sens->accuracy : 0;
 		buf->accuracy = sens->accuracy;
-		buf->divider = sens->period_divider;
+//		buf->divider = sens->period_divider;
 		buf->serialno = sens->serialno;
+		semaphore_post(sem);
+		
 		buf->errors = 0;
 		if (buf->period != 0)
 			if ((buf->period - buf->period_single) * 100 / buf->period >= PERIOD_ACCURACY_DIFF)	
@@ -107,9 +109,7 @@ sensor_value* read_sensor(sensor* sens, sensor_value* buf)
 			buf->errors =  ETIMEOUT;
 		if (buf->period > PERIOD_MAX || buf->period <= PERIOD_MIN)
 			buf->errors =  EDIRTY;
-		
-		semaphore_post(sem);
-		
+
 		return buf;
 }
 

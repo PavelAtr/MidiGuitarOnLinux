@@ -40,8 +40,8 @@ typedef struct {
 
 typedef struct {
 	period_t period; //in usecs
-	period_t period_sampl; //in sampl
-	ucounter_t divider;
+//	period_t period_sampl; //in sampl
+//	ucounter_t divider;
 	period_t period_single;
 	volume_t volume;
 	ucounter_t serialno;
