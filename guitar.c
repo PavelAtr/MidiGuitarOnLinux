@@ -7,7 +7,6 @@
 #include <string.h>
 
 struna struna1;
-struna struna2;
 
 
 note* search_pitch(note* inp)
@@ -105,7 +104,7 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 		note_copy(&str->curnote, &str->newnote);
 		str->curnote.volume = sensvalue->volume;
 		str->curnote.accuracy = sensvalue->accuracy;
-		str->flags |= NOTE_NEW;
+		str->flags |= NOTE_NEW | NOTE_NEWPITCH;
 		if (!(str->flags & NOTE_SILENCE))
 			str->flags |= NOTE_END;
 	}
@@ -113,65 +112,55 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 
 char tmp[30];
 
-void perform_send()
+void perform_send(struna* str)
 {
 	pitch tmppitch;
 	
-	if (struna1.flags & NOTE_END)
+	if (str->flags & NOTE_END)
 	{
 		#ifdef REALMIDI				
-		midiNoteOffOut(struna1.oldnote.index + STARTNOTE, normalize_velocity(struna1.oldnote.volume), CHANNEL1);
+		midiNoteOffOut(str->oldnote.index + STARTNOTE, normalize_velocity(str->oldnote.volume), CHANNEL1);
 		#endif
 		
 		#ifdef DEBUGMIDI
-		printf("STR1 note END=%d vel=%d per=%d\r\n", struna1.oldnote.index, normalize_velocity(struna1.oldnote.volume), struna1.oldnote.period);
+		printf("chn=%d note END=%d vel=%d per=%d\r\n", str->channel, str->oldnote.index, normalize_velocity(str->oldnote.volume), str->oldnote.period);
 		#endif
 		
-		struna1.flags &= ~NOTE_END;
-		struna1.flags |= NOTE_SILENCE;
+		str->flags &= ~NOTE_END;
+		str->flags |= NOTE_SILENCE;
 	}
-	if (struna1.flags & NOTE_NEW)
+	if (str->flags & NOTE_NEW)
 	{
 		#ifdef REALMIDI
-		midiNoteOnOut(struna1.curnote.index  + STARTNOTE, normalize_velocity(struna1.curnote.volume), CHANNEL1);
+		midiNoteOnOut(str->curnote.index  + STARTNOTE, normalize_velocity(str->curnote.volume), CHANNEL1);
 		#endif
 		
 		#ifdef DEBUGMIDI
-		printf("STR1 note NEW=%d vel=%d per=%d acc=%d vol=%d\r\n", struna1.curnote.index, normalize_velocity(struna1.curnote.volume), struna1.curnote.period, struna1.curnote.accuracy, struna1.curnote.volume);
+		printf("chn%d note NEW=%d vel=%d per=%d acc=%d vol=%d\r\n", str->channel, str->curnote.index, normalize_velocity(str->curnote.volume), str->curnote.period, str->curnote.accuracy, str->curnote.volume);
 		#endif
 
-//		normalize_pitch(&tmppitch, 0);
-		
-//		#ifdef REALMIDI
-//		midiPitchBendOut(tmppitch.bendLSB, tmppitch.bendMSB, CHANNEL1);
-//		#endif
-		
-//		#ifdef DEBUGMIDI
-//		printf("STR1 PITCHNEW=%d\r\n", 0);
-//		#endif
-		
-		struna1.flags &= ~NOTE_NEW;
-		struna1.flags &= ~NOTE_SILENCE;
+		str->flags &= ~NOTE_NEW;
+		str->flags &= ~NOTE_SILENCE;
 	}
-	if (struna1.flags & NOTE_NEWPITCH)
+	if (str->flags & NOTE_NEWPITCH)
 	{
-		normalize_pitch(&tmppitch, struna1.curnote.bend);
+		normalize_pitch(&tmppitch, str->curnote.bend);
 		
 		#ifdef REALMIDI		
 		midiPitchBendOut(tmppitch.bendLSB, tmppitch.bendMSB, CHANNEL1);
 		#endif
 		
 		#ifdef DEBUGMIDI
-		printf("STR1 PITCHNEW=%d\r\n", struna1.curnote.bend);
+		printf("chn=%d PITCHNEW=%d MSB=%d LSB=%d\r\n", str->channel str->curnote.bend, tmppitch.MSB, tmppitch.LSB);
 		#endif
 		
-		struna1.flags &= ~NOTE_NEWPITCH;
+		str->flags &= ~NOTE_NEWPITCH;
 	}
 
 
 	#ifdef DEBUGMIDI
-	//normalize_pitch(&tmppitch, struna1.newnote.bend);
-	//printf("%d STR1 PITCH=%d REA=%d MSB=%d LSB=%d\r\n", struna1.newnote.index, struna1.newnote.bend, tmppitch.realpitch, tmppitch.bendMSB, tmppitch.bendLSB);
+	//normalize_pitch(&tmppitch, str->newnote.bend);
+	//printf("%d STR1 PITCH=%d REA=%d MSB=%d LSB=%d\r\n", str->newnote.index, str->newnote.bend, tmppitch.realpitch, tmppitch.bendMSB, tmppitch.bendLSB);
 	
 	#endif
 }
