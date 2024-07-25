@@ -33,8 +33,6 @@ pitch_t calc_related_pitch(note* start, note* end)
 	ret = (start->index <= end->index) ?
 		(end->index - start->index) * 100 + end->bend :
 		(start->index - end->index) * 100 - end->bend;
-	ret = (ret > PITCH_MAX)	? PITCH_MAX : ret;
-	ret = (ret < PITCH_MIN)	? PITCH_MIN : ret;
 	return ret;
 }
 
@@ -60,8 +58,10 @@ note* note_copy(note* copyto, note* copyfrom)
 	return copyto;
 }
 
-pitch* normalize_pitch(pitch* input, pitch_t inpitch)
+pitch* normalize_pitch(pitch* input, pitch_t bend)
 {
+	pitch_t inpitch = (bend > PITCH_MAX)	? PITCH_MAX : bend;
+	inpitch = (bend < PITCH_MIN)	? PITCH_MIN : bend;
 	input->bendMSB = 0;
 	input->bendLSB = 0;
 	pitch_t realpitch = (float)inpitch / PITCH_MAX * MIDI_PITCH_HALF + MIDI_PITCH_ZERO;
@@ -109,10 +109,24 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 	
 	if (str->newnote.index == -1) return;
 	
+	if (str->oldvolume + VOLUME_NEW_TRESHOLD < str->curvolume)
+	{
 	// New note is louder
-	flags |= (str->oldvolume + VOLUME_NEW_TRESHOLD < str->curvolume) ? NOTE_NEW : 0;
+		flags |= NOTE_NEW;
+		#ifdef DEBUGALG
+		printf("New note %d as louder\n", str->newnote.index + STARTMIDINOTE);
+		#endif
+		goto end;
+	}
 	// Frequency after silence
-	flags |= (str->flags & NOTE_SILENCE) ? NOTE_NEW : 0;
+	if (str->flags & NOTE_SILENCE)
+	{
+		flags |=  NOTE_NEW;
+		#ifdef DEBUGALG
+		printf("New note %d after silence\n", str->newnote.index + STARTMIDINOTE);
+		#endif
+		goto end;
+	}
 	if (str->newnote.index == str->curnote.index)
 	{
 	// Note same
@@ -121,23 +135,43 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 		// if diff >= PITCH_STEP, newpitch
 			str->curnote.bend = str->newnote.bend;
 			flags |= NOTE_NEWPITCH;
+			#ifdef DEBUGALG
+			printf("New pitch %d in same note\n", str->newnote.bend);
+			#endif
+			goto end;
 		}
 	} else if (abs(str->curnote.bend) < PITCH_TRESHOLD)
 	{
 	// Note not pitched, slide
 		flags |= NOTE_NEW;
+		#ifdef DEBUGALG
+		printf("New note %d ad new frequency\n", str->newnote.index + STARTMIDINOTE);
+		#endif
+		goto end;
 	} else
 	{
 		//Note pitched
 		pitch_t newpitch = calc_related_pitch(&str->curnote, &str->newnote);
-		if (abs(str->curnote.bend - newpitch) >= PITCH_STEP)
+		if (abs(newpitch) > PITCH_FURTHER)
+		{
+			flags |= NOTE_NEW;
+			#ifdef DEBUGALG
+			printf("New note %d as further pitch\n", str->newnote.index + STARTMIDINOTE);
+			#endif
+			goto end;
+		}
+		else if (abs(str->curnote.bend - newpitch) >= PITCH_STEP)
 		{
 			// if diff >= PITCH_STEP, newpitch
 			str->curnote.bend = newpitch;
 			flags |= NOTE_NEWPITCH;
+			#ifdef DEBUGALG
+			printf("New pitch %d as no further\n", str->newnote.bend);
+			#endif
+			goto end;
 		}
 	}
-	
+end:
 	if (flags & NOTE_NEW)
 	{
 		note_copy(&str->oldnote, &str->curnote);
@@ -167,7 +201,7 @@ void perform_send(struna* str)
 		
 		#ifdef DEBUGMIDI
 		printf("chn=%d note END=%d velocity=%d period=%d\r\n",
-			str->channel, str->oldnote.index,
+			str->channel, str->oldnote.index + STARTMIDINOTE,
 			normalize_velocity(str->oldnote.volume),
 			str->oldnote.period);
 		#endif
@@ -178,13 +212,13 @@ void perform_send(struna* str)
 	if (str->flags & NOTE_NEW)
 	{
 		#ifdef REALMIDI
-		midiNoteOnOut(str->curnote.index  + STARTMIDINOTE,
+		midiNoteOnOut(str->curnote.index + STARTMIDINOTE,
 			normalize_velocity(str->curnote.volume), str->channel);
 		#endif
 		
 		#ifdef DEBUGMIDI
 		printf("chn%d note NEW=%d velocity=%d period=%d accuracy=%d\r\n",
-			str->channel, str->curnote.index,
+			str->channel, str->curnote.index  + STARTMIDINOTE,
 			normalize_velocity(str->curnote.volume),
 			str->curnote.period, str->curnote.accuracy);
 		#endif

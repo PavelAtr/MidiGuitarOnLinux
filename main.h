@@ -16,10 +16,11 @@ typedef char bool_t;
 typedef unsigned char errno_t;
 
 
-#define DEBUGMIDI
-#define REALMIDI
+//#define DEBUGMIDI
+//#define REALMIDI
+#define DEBUGALG
 #define ENABLE_BENDS
-#define DEBUGRAW
+//#define DEBUGRAW
 
 
 #endif
