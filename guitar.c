@@ -85,9 +85,10 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 		return;
 	else str->serialno = sensvalue->serialno;
 	
+	if (sensvalue->errors) return;
+
 	str->oldvolume = str->curvolume;
 	str->curvolume = sensvalue->volume;
-	if (sensvalue->errors) return;
 	
 	if (sensvalue->volume < VOLUME_NOISE)
 	{
