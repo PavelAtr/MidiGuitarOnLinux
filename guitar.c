@@ -166,7 +166,7 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 			str->curnote.bend = newpitch;
 			flags |= NOTE_NEWPITCH;
 			#ifdef DEBUGALG
-			printf("New pitch %d as no further\n", str->newnote.bend);
+			printf("New pitch %d as no further\n", newpitch);
 			#endif
 			goto end;
 		}
