@@ -8,7 +8,6 @@
 
 struna struna1;
 
-
 pitch_t search_pitch(note* inp, period_t period)
 {
 	pitch_t bend;
@@ -16,44 +15,14 @@ pitch_t search_pitch(note* inp, period_t period)
 	{
 		bend = (notes[inp->index] - period) * 100 /
 			(notes[inp->index] - notes[inp->index + 1]);
-//		printf("pitch upper %d %d\n", notes[inp->index] - period, notes[inp->index] - notes[inp->index + 1]);
 	}
 	else
 	{
 		bend = -((period - notes[inp->index]) * 100 / (notes[inp->index - 1] - notes[inp->index]));
 
-//		printf("pitch lower %d %d \n", notes[inp->index] - period, notes[inp->index -1] - notes[inp->index]);
 	}
 	return bend;
 }
-
-/*note* search_pitch(note* inp)
-{
-	period_t a = notes[inp->index] - inp->period;
-	period_t b = inp->period - notes[inp->index + 1];
-	period_t c = notes[inp->index] - notes[inp->index + 1];
-
-	if (a < b)
-	{
-		inp->bend = a * 100 / c;
-	} else
-	{
-		inp->bend = - (b * 100 / c);
-		inp->index = inp->index + 1;
-	}
-	
-	return inp;
-}
-
-pitch_t calc_related_pitch(note* start, note* end)
-{
-	pitch_t ret = 0;
-	ret = (start->index <= end->index) ?
-		(end->index - start->index) * 100 + end->bend :
-		(start->index - end->index) * 100 - end->bend;
-	return ret;
-}
-* */
 
 note* search_note(note* inp)
 {
@@ -62,15 +31,9 @@ note* search_note(note* inp)
 		if (inp->period <= notes[i] && inp->period > notes[i + 1])
 		{
 			if (notes[i] - inp->period <= inp->period - notes[i + 1])
-			{
-				inp->search = "prev";
 				inp->index = i;
-			}
 			else
-			{
-				inp->search = "next";
 				inp->index = i + 1;
-			}
 				
 			inp->bend = search_pitch(inp, inp->period);
 			return inp;
@@ -89,11 +52,11 @@ note* note_copy(note* copyto, note* copyfrom)
 
 pitch* normalize_pitch(pitch* input, pitch_t bend)
 {
-	pitch_t inpitch = (bend > PITCH_MAX)	? PITCH_MAX : bend;
-	inpitch = (bend < PITCH_MIN)	? PITCH_MIN : bend;
+	pitch_t inpitch = (bend >= PITCH_MAX) ? PITCH_MAX : bend;
+	inpitch = (bend <= PITCH_MIN) ? PITCH_MIN : bend;
 	input->bendMSB = 0;
 	input->bendLSB = 0;
-	pitch_t realpitch = (float)inpitch / PITCH_MAX * MIDI_PITCH_HALF + MIDI_PITCH_ZERO;
+	pitch_t realpitch = inpitch * MIDI_PITCH_HALF / PITCH_MAX + MIDI_PITCH_ZERO;
 	input->realpitch = realpitch;
 	input->bendMSB = (realpitch >> 7) & MIDI_PITCH_MLSB_MASK;
 	input->bendLSB = realpitch & MIDI_PITCH_MLSB_MASK;

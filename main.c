@@ -40,6 +40,10 @@ int main(int argc, char** argv)
 		perform_freqvol(&sensvalue1, &struna1);
 		perform_send(&struna1);
 		
+//		pitch tmp;
+//		normalize_pitch(&tmp, -200);
+//		printf("MSB=%d LSB=%d\n", tmp.bendMSB, tmp.bendLSB);
+		
 		usleep(100);
 	}
 	return 0;
