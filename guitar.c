@@ -9,7 +9,25 @@
 struna struna1;
 
 
-note* search_pitch(note* inp)
+pitch_t search_pitch(note* inp, period_t period)
+{
+	pitch_t bend;
+	if (notes[inp->index] >= period)
+	{
+		bend = (notes[inp->index] - period) * 100 /
+			(notes[inp->index] - notes[inp->index + 1]);
+//		printf("pitch upper %d %d\n", notes[inp->index] - period, notes[inp->index] - notes[inp->index + 1]);
+	}
+	else
+	{
+		bend = -((period - notes[inp->index]) * 100 / (notes[inp->index - 1] - notes[inp->index]));
+
+//		printf("pitch lower %d %d \n", notes[inp->index] - period, notes[inp->index -1] - notes[inp->index]);
+	}
+	return bend;
+}
+
+/*note* search_pitch(note* inp)
 {
 	period_t a = notes[inp->index] - inp->period;
 	period_t b = inp->period - notes[inp->index + 1];
@@ -35,6 +53,7 @@ pitch_t calc_related_pitch(note* start, note* end)
 		(start->index - end->index) * 100 - end->bend;
 	return ret;
 }
+* */
 
 note* search_note(note* inp)
 {
@@ -42,8 +61,18 @@ note* search_note(note* inp)
 	{
 		if (inp->period <= notes[i] && inp->period > notes[i + 1])
 		{
-			inp->index = i;
-			search_pitch(inp);
+			if (notes[i] - inp->period <= inp->period - notes[i + 1])
+			{
+				inp->search = "prev";
+				inp->index = i;
+			}
+			else
+			{
+				inp->search = "next";
+				inp->index = i + 1;
+			}
+				
+			inp->bend = search_pitch(inp, inp->period);
 			return inp;
 		}
 	}
@@ -92,9 +121,12 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 	
 	if (sensvalue->volume < VOLUME_NOISE)
 	{
-		// End note by volume
 		if (!(str->flags & NOTE_SILENCE))
 		{
+		// End note by volume if not silence
+			#ifdef DEBUGALG
+			printf("End note by volume\n");
+			#endif
 			note_copy(&str->oldnote, &str->curnote);
 			str->flags |= NOTE_END;
 		}
@@ -110,13 +142,15 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 	
 	if (str->newnote.index == -1) return;
 	
-	if (str->oldvolume + VOLUME_NEW_TRESHOLD < str->curvolume)
+	if (str->curvolume > str->oldvolume + VOLUME_NEW_TRESHOLD)
 	{
 	// New note is louder
 		flags |= NOTE_NEW;
 		#ifdef DEBUGALG
-		printf("New note %d as louder\n", str->newnote.index + STARTMIDINOTE);
+		printf("New note %d as louder, volume=%d period=%d\n",
+			str->newnote.index, str->curvolume, str->newnote.period);
 		#endif
+		str->oldvolume = str->curvolume;
 		goto end;
 	}
 	// Frequency after silence
@@ -124,7 +158,8 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 	{
 		flags |=  NOTE_NEW;
 		#ifdef DEBUGALG
-		printf("New note %d after silence\n", str->newnote.index + STARTMIDINOTE);
+		printf("New note %d after silence, volume=%d, period=%d\n",
+			str->newnote.index, sensvalue->volume, str->newnote.period);
 		#endif
 		goto end;
 	}
@@ -137,39 +172,48 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 			str->curnote.bend = str->newnote.bend;
 			flags |= NOTE_NEWPITCH;
 			#ifdef DEBUGALG
+			#ifdef ENABLE_BENDS
 			printf("New pitch %d in same note\n", str->newnote.bend);
 			#endif
+			#endif
 			goto end;
 		}
-	} else if (abs(str->curnote.bend) < PITCH_TRESHOLD)
-	{
-	// Note not pitched, slide
-		flags |= NOTE_NEW;
-		#ifdef DEBUGALG
-		printf("New note %d ad new frequency\n", str->newnote.index + STARTMIDINOTE);
-		#endif
-		goto end;
 	} else
 	{
-		//Note pitched
-		pitch_t newpitch = calc_related_pitch(&str->curnote, &str->newnote);
-		if (abs(newpitch) > PITCH_FURTHER)
+		if (abs(str->curnote.bend) < PITCH_TRESHOLD)
 		{
+		// Note not pitched, slide
 			flags |= NOTE_NEW;
 			#ifdef DEBUGALG
-			printf("New note %d as further pitch\n", str->newnote.index + STARTMIDINOTE);
+			printf("New note %d as new frequency, volume=%d, period=%d\n",
+				str->newnote.index, sensvalue->volume, str->newnote.period);
 			#endif
 			goto end;
-		}
-		else if (abs(str->curnote.bend - newpitch) >= PITCH_STEP)
+		} else
 		{
-			// if diff >= PITCH_STEP, newpitch
-			str->curnote.bend = newpitch;
-			flags |= NOTE_NEWPITCH;
-			#ifdef DEBUGALG
-			printf("New pitch %d as no further\n", newpitch);
-			#endif
-			goto end;
+			//Note pitched
+			pitch_t newpitch = search_pitch(&str->curnote, str->newnote.period);
+			if (abs(newpitch) > PITCH_FURTHER)
+			{
+				flags |= NOTE_NEW;
+				#ifdef DEBUGALG
+				printf("New note %d as further pitch, volume=%d\n",
+					str->newnote.index + STARTMIDINOTE, sensvalue->volume);
+				#endif
+				goto end;
+			}
+			else if (abs(str->curnote.bend - newpitch) >= PITCH_STEP)
+			{
+				// if diff >= PITCH_STEP, newpitch
+				str->curnote.bend = newpitch;
+				flags |= NOTE_NEWPITCH;
+				#ifdef DEBUGALG
+				#ifdef ENABLE_BENDS
+				printf("New further pitch %d\n", newpitch);
+				#endif
+				#endif
+				goto end;
+			}
 		}
 	}
 end:
