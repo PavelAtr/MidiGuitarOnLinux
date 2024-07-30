@@ -190,7 +190,7 @@ end:
 		if (!(str->flags & NOTE_SILENCE))
 			str->flags |= NOTE_END;
 	}
-	if (flags & NOTE_NEWPITCH)
+	if ((flags & NOTE_NEWPITCH) && !(str->flags & NOTE_SILENCE))
 		str->flags |= NOTE_NEWPITCH;
 }
 
@@ -225,7 +225,7 @@ void perform_send(struna* str)
 		#endif
 		
 		#ifdef DEBUGMIDI
-		printf("chn%d note NEW=%d velocity=%d period=%d accuracy=%d\r\n",
+		printf("chn=%d note NEW=%d velocity=%d period=%d accuracy=%d\r\n",
 			str->channel, str->curnote.index  + STARTMIDINOTE,
 			normalize_velocity(str->curnote.volume),
 			str->curnote.period, str->curnote.accuracy);
