@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 
-struna struna1;
+struna struny[CHANNEL_NUM];
 
 pitch_t search_pitch(note* inp, period_t period)
 {
@@ -105,15 +105,14 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 	
 	if (str->newnote.index == -1) return;
 	
-	if (str->curvolume > str->oldvolume + VOLUME_NEW_TRESHOLD)
+	if (str->curvolume > str->oldvolume + 50)
 	{
 	// New note is louder
 		flags |= NOTE_NEW;
 		#ifdef DEBUGALG
-		printf("New note %d as louder, volume=%d period=%d\n",
+		printf("New note %d as LOUDER, volume=%d period=%d\n",
 			str->newnote.index, str->curvolume, str->newnote.period);
 		#endif
-		str->oldvolume = str->curvolume;
 		goto end;
 	}
 	// Frequency after silence
@@ -121,7 +120,7 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 	{
 		flags |=  NOTE_NEW;
 		#ifdef DEBUGALG
-		printf("New note %d after silence, volume=%d, period=%d\n",
+		printf("New note %d after SILENCE, volume=%d, period=%d\n",
 			str->newnote.index, sensvalue->volume, str->newnote.period);
 		#endif
 		goto end;
@@ -146,12 +145,14 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 		if (abs(str->curnote.bend) < PITCH_TRESHOLD)
 		{
 		// Note not pitched, slide
+			#ifdef ENABLE_SLIDES
 			flags |= NOTE_NEW;
 			#ifdef DEBUGALG
-			printf("New note %d as new frequency, volume=%d, period=%d\n",
+			printf("New note %d as NEW FREQUENCY, volume=%d, period=%d\n",
 				str->newnote.index, sensvalue->volume, str->newnote.period);
 			#endif
 			goto end;
+			#endif
 		} else
 		{
 			//Note pitched
@@ -160,7 +161,7 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 			{
 				flags |= NOTE_NEW;
 				#ifdef DEBUGALG
-				printf("New note %d as further pitch, volume=%d\n",
+				printf("New note %d as FURTHER PITCH, volume=%d\n",
 					str->newnote.index + STARTMIDINOTE, sensvalue->volume);
 				#endif
 				goto end;
@@ -186,6 +187,7 @@ end:
 		note_copy(&str->curnote, &str->newnote);
 		str->curnote.volume = sensvalue->volume;
 		str->curnote.accuracy = sensvalue->accuracy;
+		str->curnote.serialno = sensvalue->serialno;
 		str->flags |= NOTE_NEW | NOTE_NEWPITCH;
 		if (!(str->flags & NOTE_SILENCE))
 			str->flags |= NOTE_END;
@@ -225,10 +227,10 @@ void perform_send(struna* str)
 		#endif
 		
 		#ifdef DEBUGMIDI
-		printf("chn=%d note NEW=%d velocity=%d period=%d accuracy=%d\r\n",
+		printf("chn=%d note NEW=%d velocity=%d period=%d accuracy=%d volume=%d cur=%d old=%d\r\n",
 			str->channel, str->curnote.index  + STARTMIDINOTE,
 			normalize_velocity(str->curnote.volume),
-			str->curnote.period, str->curnote.accuracy);
+			str->curnote.period, str->curnote.accuracy, str->curnote.volume, str->curvolume, str->oldvolume);
 		#endif
 
 		str->flags &= ~NOTE_NEW;
@@ -258,5 +260,5 @@ void perform_send(struna* str)
 
 void guitar_init()
 {
-	struna1.channel = CHANNEL1;
+	struny[0].channel = 0;
 }

@@ -11,12 +11,12 @@
 
 semaphore_t sem = 0;
 
-sensor sens;
+sensor sensors[CHANNEL_NUM];
 ucounter_t PERIOD_ACCURACY_MIN;
 
 void adcprocess()
 {
-	sensor* s = &sens;
+	sensor* s = &sensors[0];
 	for (jack_nframes_t i = 0; i < ports_nframes; i++)
 	{
 		volume_t ADC_voltage = ADC_MAX * inputbuf[i] -ADC_ZERO_SIN;
@@ -25,16 +25,16 @@ void adcprocess()
 		s->accuracy_tmp++;
 		s->samplecounter++;
 
-		if (ADC_voltage > ADC_ZERO_SIN)
+		if (ADC_voltage > 0)
 			s->comparator_zero = 1;
-		else if (sens.comparator_zero)
+		else if (s->comparator_zero)
 		{
 		// From + to - trought zero, working always
 			s->comparator_zero = 0;
 			s->period_volume_max = SUSTAIN_FACTOR * s->period_volume_max;
 			s->period_volume_min = SUSTAIN_FACTOR * s->period_volume_min;
 		}
-		if (ADC_voltage > sens.period_volume_max)
+		if (ADC_voltage > s->period_volume_max)
 		{
 		// Total accuracy of sinusoide max
 			s->period_volume_max = ADC_voltage;
@@ -59,8 +59,6 @@ void adcprocess()
 			//comparator work at SUSTAIN_FACTOR(minsin) once by period
 				s->comparator_min = 0;
 				// Write values by period
-				s->prev_single = s->cur_single;
-				s->cur_single = s->period_volume_last;
 				if (s->ready)
 				{
 				// Counted needed measurments, write result walues
@@ -85,7 +83,7 @@ void freqvolmeter_init()
 {
 	extern_process = &adcprocess;
 	PERIOD_ACCURACY_MIN = ports_nframes;
-	memset(&sens, 0x0, sizeof(sens));
+	memset(&sensors[0], 0x0, sizeof(sensor));
 }
 
 sensor_value* read_sensor(sensor* sens, sensor_value* buf)
@@ -95,17 +93,13 @@ sensor_value* read_sensor(sensor* sens, sensor_value* buf)
 			(sens->cur - sens->prev) * 1000000 /
 			(sens->period_divider * SAMPLERATE) 
 			: 0;
-		period_t period_single = (sens->cur_single - sens->prev_single)
-			* 1000000 / SAMPLERATE;
 		buf->volume = (sens->accuracy != 0)?
 			sens->volume / sens->accuracy : 0;
 		buf->accuracy = sens->accuracy;
 		buf->serialno = sens->serialno;
+		buf->period_divider = sens->period_divider;
 		semaphore_post(sem);
 		buf->errors = 0;
-		if (buf->period != 0)
-			if (abs(buf->period - period_single) * 100 / buf->period >= PERIOD_ACCURACY_DIFF)	
-				buf->errors =  EACCURACY;
 		if (sens->samplecounter - sens->prev > PERIOD_TIMEOUT)
 			buf->errors =  ETIMEOUT;
 		if (buf->period > PERIOD_MAX || buf->period <= PERIOD_MIN)

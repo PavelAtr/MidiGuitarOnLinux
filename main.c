@@ -10,15 +10,15 @@
 
 void guitar_baner(void)
 {
-	midiNoteOnOut(0x24, 127, CHANNEL1);
+	midiNoteOnOut(0x24, 127, 0);
 	sleep(1);
-	midiNoteOffOut(0x24, 127, CHANNEL1);
-	midiNoteOnOut(0x28, 127, CHANNEL1);
+	midiNoteOffOut(0x24, 127, 0);
+	midiNoteOnOut(0x28, 127, 0);
 	sleep(1);
-	midiNoteOffOut(0x28, 127, CHANNEL1);
-	midiNoteOnOut(0x2B, 127, CHANNEL1);
+	midiNoteOffOut(0x28, 127, 0);
+	midiNoteOnOut(0x2B, 127, 0);
 	sleep(1);
-	midiNoteOffOut(0x2B, 127, CHANNEL1);
+	midiNoteOffOut(0x2B, 127, 0);
 }
 
 int main(int argc, char** argv)
@@ -28,23 +28,18 @@ int main(int argc, char** argv)
 	guitar_init();
 	while(1) 
 	{
-		sensor_value sensvalue1;
-		read_sensor(&sens, &sensvalue1);
+		sensor_value sensvalue[CHANNEL_NUM];
+		read_sensor(&sensors[0], &sensvalue[0]);
 		
 		#ifdef DEBUGRAW
-		if (!sensvalue1.errors && sensvalue1.volume > VOLUME_NOISE)
-			printf("RMS=%d\t\tperiod=%d\t\taccuracy=%d\n",
-				sensvalue1.volume, sensvalue1.period, sensvalue1.accuracy);
+		if (!sensvalue[0].errors && sensvalue[0].volume > VOLUME_NOISE)
+			printf("RMS=%d per=%d acc=%d div=%d\n",
+				sensvalue[0].volume, sensvalue[0].period,
+				sensvalue[0].accuracy, sensvalue[0].period_divider);
 		#endif
 		
-		perform_freqvol(&sensvalue1, &struna1);
-		perform_send(&struna1);
-		
-//		pitch tmp;
-//		normalize_pitch(&tmp, -200);
-//		printf("MSB=%d LSB=%d\n", tmp.bendMSB, tmp.bendLSB);
-		
-		usleep(100);
+		perform_freqvol(&sensvalue[0], &struny[0]);
+		perform_send(&struny[0]);
 	}
 	return 0;
 }

@@ -8,6 +8,7 @@ typedef struct {
 	volume_t volume;
 	period_t period;
 	ucounter_t accuracy;
+	ucounter_t serialno;
 	int index;
 	pitch_t bend;
 	char* search;
@@ -29,6 +30,7 @@ typedef struct {
 #define NOTE_END 0x02
 #define NOTE_NEWPITCH 0x04
 #define NOTE_SILENCE 0x08
+#define NOTE_LOUDER 0x10
 
 typedef struct {
 	pitch_t realpitch;
@@ -43,18 +45,17 @@ typedef struct {
 #define PITCH_STEP 10 // in %, to reduce event count
 #define PITCH_FURTHER 300 //in %, after this pitch new note occur
 #define VOLUME_MAX 5000
-#define VOLUME_NEW_TRESHOLD VOLUME_MAX * 5 / 100
+#define VOLUME_NEW_TRESHOLD VOLUME_MAX * 1 / 100
+#define SERIAL_IS_NEW 50
 
 
 
-extern struna struna1;
+extern struna struny[CHANNEL_NUM];
 
 void guitar_init();
 void perform_freqvol(sensor_value* sensvalue, struna* str);
 void perform_send(struna* str);
 pitch* normalize_pitch(pitch* input, pitch_t bend);
-
-extern struna struna1;
 
 #endif
 
