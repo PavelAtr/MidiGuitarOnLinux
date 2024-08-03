@@ -16,9 +16,8 @@ void adcprocess()
 	sensor* s = &sensors[0];
 	
 	if (!s->overload)
-	{
-		//semaphore_waitnosleep(s->sem);
-	} else
+		s->sem = 1;
+	else
 		printf("OVERLOAD!\r\n");
 
 	s->overload = 1;
