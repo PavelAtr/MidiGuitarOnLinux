@@ -34,19 +34,22 @@ void adcprocess()
 		// Total accuracy of sinusoide max
 			//Store peak of voltage
 			s->volume_max = ADC_voltage;
-			if (s->volume_max > s->volume_max_prev && s->comparator_max)
+			s->volume_min = 0;
+
+			if (s->volume_max > s->volume_max_prev)
 			{
-			//Comaprator positive halfwave
-				s->comparator_max = 0;
-				//Set parameters of negative halfvawe
-				s->volume_min_prev  = s->volume_min * SUSTAIN_FACTOR;
-				s->volume_min = 0;
-				//Increment period divider
-				s->period_divider_tmp++;
+				s->volume_max_prev  = s->volume_max * SUSTAIN_FACTOR;
+				if (s->comparator_max)
+				{
+				//Comaprator positive halfwave
+					s->comparator_max = 0;
+					//Increment period divider
+					s->period_divider_tmp++;
+				}
 			}
 			// Store current peak of period
 			s->cur_tmp = s->samplecounter;
-			if (s->period_divider_tmp < 2)
+			if (s->period_divider_tmp < 1)
 			{
 			//Start measurment at sinusoide max
 				//Store start peak of period and reset values
@@ -66,24 +69,28 @@ void adcprocess()
 		{
 			//Store peak of voltage
 			s->volume_min = ADC_voltage;
-			if (s->volume_min < s->volume_min_prev && s->comparator_min)
+			s->volume_max = 0;
+
+			if (s->volume_min < s->volume_min_prev)
 			{
-			//Comparator negative halfvawe
-				s->comparator_min = 0;
-				//Set parameters of positive halfwave
-				s->volume_max_prev = s->volume_max * SUSTAIN_FACTOR;
-				s->volume_max = 0;
-				if (s->ready)
+				s->volume_min_prev = s->volume_min * SUSTAIN_FACTOR;
+
+				if (s->comparator_min)
 				{
-				// Needed measurments counted, write result values
-					s->ready = 0;
-					s->serialno++;
-					s->prev = s->prev_tmp;
-					s->cur = s->cur_tmp;
-					s->volume = s->volume_tmp;
-					s->accuracy = s->accuracy_tmp;
-					s->period_divider = s->period_divider_tmp;
-					s->period_divider_tmp = 0;
+				//Comparator negative halfvawe
+					s->comparator_min = 0;
+					if (s->ready)
+					{
+					// Needed measurments counted, write result values
+						s->ready = 0;
+						s->serialno++;
+						s->prev = s->prev_tmp;
+						s->cur = s->cur_tmp;
+						s->volume = s->volume_tmp;
+						s->accuracy = s->accuracy_tmp;
+						s->period_divider = s->period_divider_tmp;
+						s->period_divider_tmp = 0;
+					}
 				}
 			}
 			//Enable positive comparator
