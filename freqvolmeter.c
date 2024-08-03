@@ -6,10 +6,7 @@
 #include "freqvolmeter.h"
 #include "jack.h"
 #include "main.h"
-#include "simplsemaphore.h"
 #include <string.h>
-
-semaphore_t sem = 0;
 
 sensor sensors[CHANNEL_NUM];
 ucounter_t PERIOD_ACCURACY_MIN;
@@ -17,66 +14,83 @@ ucounter_t PERIOD_ACCURACY_MIN;
 void adcprocess()
 {
 	sensor* s = &sensors[0];
+	
+	if (!s->overload)
+	{
+		//semaphore_waitnosleep(s->sem);
+	} else
+		printf("OVERLOAD!\r\n");
+
+	s->overload = 1;
+		
 	for (jack_nframes_t i = 0; i < ports_nframes; i++)
 	{
 		volume_t ADC_voltage = ADC_MAX * inputbuf[i] -ADC_ZERO_SIN;
-		semaphore_waitnosleep(sem);
 		s->volume_tmp += abs(ADC_voltage);
 		s->accuracy_tmp++;
 		s->samplecounter++;
 
-		if (ADC_voltage > 0)
-			s->comparator_zero = 1;
-		else if (s->comparator_zero)
-		{
-		// From + to - trought zero, working always
-			s->comparator_zero = 0;
-			s->period_volume_max = SUSTAIN_FACTOR * s->period_volume_max;
-			s->period_volume_min = SUSTAIN_FACTOR * s->period_volume_min;
-		}
-		if (ADC_voltage > s->period_volume_max)
+		if (ADC_voltage >= s->volume_max)
 		{
 		// Total accuracy of sinusoide max
-			s->period_volume_max = ADC_voltage;
-			s->comparator_min = 1;
-			s->period_volume_last = s->samplecounter;
-			if (s->comparator_max)
+			s->volume_max = ADC_voltage;
+			if (s->volume_max > s->volume_max_prev && s->comparator_max)
 			{
-			//comparator work at SUSTAIN_FACTOR(maxsin) once by period
+				//Comaprator positive halfwave
 				s->comparator_max = 0;
+				//Set parameters of negative halfvawe
+				s->volume_min_prev  = s->volume_min * SUSTAIN_FACTOR;
+				s->volume_min = 0;
+				//Increment period divider
 				s->period_divider_tmp++;
-				if (s->accuracy_tmp > PERIOD_ACCURACY_MIN)
-				// Counted needed measurments
-					s->ready = 1;
 			}
-		}
-		if (ADC_voltage < s->period_volume_min)
-		{
-			s->period_volume_min = ADC_voltage;
-			s->comparator_max = 1;
-			if (s->comparator_min)
+			// Store current peak
+			s->cur_tmp = s->samplecounter;
+			if (s->period_divider_tmp < 2)
 			{
-			//comparator work at SUSTAIN_FACTOR(minsin) once by period
+			//Start measurment at sinusoide max
+				//Store start peak
+				s->prev_tmp = s->samplecounter;
+				s->volume_tmp = 0;
+				s->accuracy_tmp = 0;
+			}
+			if (s->accuracy_tmp > PERIOD_ACCURACY_MIN)
+			{
+			// Needed measurments counted
+				s->ready = 1;
+			}
+			//Enable negative comparator
+			s->comparator_min = 1;
+		}
+		if (ADC_voltage <= s->volume_min)
+		{
+			s->volume_min = ADC_voltage;
+			if (s->volume_min < s->volume_min_prev && s->comparator_min)
+			{
+				//Comparator negative halfvawe
 				s->comparator_min = 0;
-				// Write values by period
+				//Set parameters of positive halfwave
+				s->volume_max_prev = s->volume_max * SUSTAIN_FACTOR;
+				s->volume_max = 0;
 				if (s->ready)
 				{
-				// Counted needed measurments, write result walues
+				// Needed measurments counted, write result values
 					s->ready = 0;
 					s->serialno++;
-					s->prev = s->cur;
-					s->cur = s->period_volume_last;
+					s->prev = s->prev_tmp;
+					s->cur = s->cur_tmp;
 					s->volume = s->volume_tmp;
 					s->accuracy = s->accuracy_tmp;
 					s->period_divider = s->period_divider_tmp;
-					s->volume_tmp = 0;
-					s->accuracy_tmp = 0;
 					s->period_divider_tmp = 0;
 				}
 			}
+			//Enable positive comparator
+			s->comparator_max = 1;
 		}
-		semaphore_post(sem);
 	}
+	semaphore_post(s->sem);
+	s->overload = 0;
 }
 
 void freqvolmeter_init()
@@ -88,17 +102,17 @@ void freqvolmeter_init()
 
 sensor_value* read_sensor(sensor* sens, sensor_value* buf)
 {
-		semaphore_wait(sem);
-		buf->period =  (sens->period_divider > 0)?
+		semaphore_wait(sens->sem);
+		buf->period =  (sens->period_divider > 1)?
 			(sens->cur - sens->prev) * 1000000 /
-			(sens->period_divider * SAMPLERATE) 
+			((sens->period_divider - 1) * SAMPLERATE) 
 			: 0;
 		buf->volume = (sens->accuracy != 0)?
 			sens->volume / sens->accuracy : 0;
 		buf->accuracy = sens->accuracy;
 		buf->serialno = sens->serialno;
 		buf->period_divider = sens->period_divider;
-		semaphore_post(sem);
+		semaphore_post(sens->sem);
 		buf->errors = 0;
 		if (sens->samplecounter - sens->prev > PERIOD_TIMEOUT)
 			buf->errors =  ETIMEOUT;

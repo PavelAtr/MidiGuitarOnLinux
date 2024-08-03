@@ -46,6 +46,7 @@ typedef struct {
 #define PITCH_FURTHER 300 //in %, after this pitch new note occur
 #define VOLUME_MAX 5000
 #define VOLUME_NEW_TRESHOLD VOLUME_MAX * 1 / 100
+#define VOLUME_NOISE 100 //in ADC points
 #define SERIAL_IS_NEW 50
 
 

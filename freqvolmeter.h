@@ -2,6 +2,7 @@
 #define _FREQVOLMETER_H
 #include "main.h"
 #include "jack.h"
+#include "simplsemaphore.h"
 
 #define PERIOD_MAX 40000 // in usecs
 #define PERIOD_MIN 200 // in usecs
@@ -10,7 +11,6 @@
 #define ADC_ZERO_SIN 0 //in ADC points
 #define ADC_MAX_SIN ADC_MAX - ADC_ZERO_SIN //in ADC points
 #define ADC_MAX_RMS (ADC_MAX * 0.638) //in ADC points
-#define VOLUME_NOISE 50 //in ADC points
 #define SUSTAIN_FACTOR 0.8 //0 ... 1 float
 #define PERIOD_ACCURACY_DIFF 10 // period accuracy error %
 
@@ -22,15 +22,21 @@ typedef struct {
 	ulongcounter_t cur;
 	ucounter_t period_divider;
 	ucounter_t serialno;
+	flag_short_t start;
 	flag_short_t ready;
+	flag_short_t overload;
+	semaphore_t sem;
 	
 	ulongcounter_t samplecounter;
-	volume_t period_volume_max;
-	volume_t period_volume_min;
+	volume_t volume_max;
+	volume_t volume_min;
+	volume_t volume_max_prev;
+	volume_t volume_min_prev;
 	volume_long_t volume_tmp;
 	ucounter_t accuracy_tmp;
 	ucounter_t period_divider_tmp;
-	ulongcounter_t period_volume_last;
+	ulongcounter_t cur_tmp;
+	ulongcounter_t prev_tmp;
 	flag_short_t comparator_zero;
 	flag_short_t comparator_max;
 	flag_short_t comparator_min;
