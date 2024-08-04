@@ -36,6 +36,7 @@ int main(int argc, char** argv)
 			printf("RMS=%d per=%d acc=%d div=%d\n",
 				sensvalue[0].volume, sensvalue[0].period,
 				sensvalue[0].accuracy, sensvalue[0].period_divider);
+		else reset_sensor(&sensors[0]);
 		#endif
 		
 		perform_freqvol(&sensvalue[0], &struny[0]);

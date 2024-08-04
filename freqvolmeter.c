@@ -24,78 +24,75 @@ void adcprocess()
 		
 	for (jack_nframes_t i = 0; i < ports_nframes; i++)
 	{
-		volume_t ADC_voltage = ADC_MAX * inputbuf[i] -ADC_ZERO_SIN;
-		s->volume_tmp += abs(ADC_voltage);
+		volume_t ADC = ADC_MAX * inputbuf[i] - ADC_ZERO_SIN;
+		s->volume_tmp += abs(ADC);
 		s->accuracy_tmp++;
 		s->samplecounter++;
 
-		if (ADC_voltage >= s->volume_max)
+/*		if (ADC > ADC_ZERO_TRESHOLD)
+			s->comparator_zero = 1;
+		
+		if (ADC < - ADC_ZERO_TRESHOLD && s->comparator_zero)
 		{
-		// Total accuracy of sinusoide max
-			//Store peak of voltage
-			s->volume_max = ADC_voltage;
-			s->volume_min = 0;
-
+			s->comparator_zero = 0;
+		}
+*/
+		if (ADC > s->volume_max)
+		{
+			s->volume_max = ADC;
+			s->cur_tmp = s->samplecounter;
+			s->comparator_min = 1;
 			if (s->volume_max > s->volume_max_prev)
 			{
-				s->volume_max_prev  = s->volume_max * SUSTAIN_FACTOR;
 				if (s->comparator_max)
 				{
-				//Comaprator positive halfwave
 					s->comparator_max = 0;
-					//Increment period divider
+					if (s->volume_min <= s->volume_min_prev)
+						s->volume_min_prev = s->volume_min * SUSTAIN_FACTOR;
+					s->volume_min = s->volume_min_prev;
 					s->period_divider_tmp++;
 				}
 			}
-			// Store current peak of period
-			s->cur_tmp = s->samplecounter;
-			if (s->period_divider_tmp < 1)
+			if (s->period_divider_tmp < 2)
 			{
-			//Start measurment at sinusoide max
-				//Store start peak of period and reset values
 				s->prev_tmp = s->samplecounter;
 				s->volume_tmp = 0;
 				s->accuracy_tmp = 0;
+				s->zero_counter_tmp = 0;
 			}
 			if (s->accuracy_tmp > PERIOD_ACCURACY_MIN)
 			{
-			// Needed measurments counted
 				s->ready = 1;
 			}
-			//Enable negative comparator
-			s->comparator_min = 1;
 		}
-		if (ADC_voltage <= s->volume_min)
+		
+		if (ADC < s->volume_min)
 		{
-			//Store peak of voltage
-			s->volume_min = ADC_voltage;
-			s->volume_max = 0;
-
+			s->volume_min = ADC;
 			if (s->volume_min < s->volume_min_prev)
 			{
-				s->volume_min_prev = s->volume_min * SUSTAIN_FACTOR;
-
+				s->comparator_max = 1;
 				if (s->comparator_min)
 				{
-				//Comparator negative halfvawe
 					s->comparator_min = 0;
-					if (s->ready)
-					{
-					// Needed measurments counted, write result values
-						s->ready = 0;
-						s->serialno++;
-						s->prev = s->prev_tmp;
-						s->cur = s->cur_tmp;
-						s->volume = s->volume_tmp;
-						s->accuracy = s->accuracy_tmp;
-						s->period_divider = s->period_divider_tmp;
-						s->period_divider_tmp = 0;
-					}
+					if (s->volume_max >= s->volume_max_prev)
+						s->volume_max_prev = s->volume_max * SUSTAIN_FACTOR;
+					s->volume_max = s->volume_max_prev;
+				}
+				if (s->ready)
+				{
+					s->ready = 0;
+					s->serialno++;
+					s->prev = s->prev_tmp;
+					s->cur = s->cur_tmp;
+					s->volume = s->volume_tmp;
+					s->accuracy = s->accuracy_tmp;
+					s->period_divider = s->period_divider_tmp;
+					s->period_divider_tmp = 0;
 				}
 			}
-			//Enable positive comparator
-			s->comparator_max = 1;
 		}
+
 	}
 	semaphore_post(s->sem);
 	s->overload = 0;
@@ -108,25 +105,33 @@ void freqvolmeter_init()
 	memset(&sensors[0], 0x0, sizeof(sensor));
 }
 
-sensor_value* read_sensor(sensor* sens, sensor_value* buf)
+sensor_value* read_sensor(sensor* s, sensor_value* buf)
 {
-		semaphore_wait(sens->sem);
-		buf->period =  (sens->period_divider > 1)?
-			(sens->cur - sens->prev) * 1000000 /
-			((sens->period_divider - 1) * SAMPLERATE) 
+		semaphore_wait(s->sem);
+		buf->period =  (s->period_divider > 1)?
+			(s->cur - s->prev) * 1000000 /
+			((s->period_divider - 1) * SAMPLERATE) 
 			: 0;
-		buf->volume = (sens->accuracy != 0)?
-			sens->volume / sens->accuracy : 0;
-		buf->accuracy = sens->accuracy;
-		buf->serialno = sens->serialno;
-		buf->period_divider = sens->period_divider;
-		semaphore_post(sens->sem);
+		buf->volume = (s->accuracy != 0)?
+			s->volume / s->accuracy : 0;
+		buf->accuracy = s->accuracy;
+		buf->serialno = s->serialno;
+		buf->period_divider = s->period_divider;
+		semaphore_post(s->sem);
 		buf->errors = 0;
-		if (sens->samplecounter - sens->prev > PERIOD_TIMEOUT)
+		if (s->samplecounter - s->prev > PERIOD_TIMEOUT)
 			buf->errors =  ETIMEOUT;
 		if (buf->period > PERIOD_MAX || buf->period <= PERIOD_MIN)
 			buf->errors =  EDIRTY;
 
 		return buf;
+}
+
+void reset_sensor(sensor* s)
+{
+	s->volume_max_prev = 0;
+	s->volume_min_prev = 0;
+	s->volume_max = 0;
+	s->volume_min = 0;
 }
 

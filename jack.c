@@ -32,7 +32,7 @@ int process (jack_nframes_t nframes, void *arg)
 
 	extern_process();
 	
-	semaphore_waitnosleep(midisem);
+	midisem = 1;
 	void* out = jack_port_get_buffer(midi_port, nframes);
 	jack_midi_clear_buffer(out);
 
