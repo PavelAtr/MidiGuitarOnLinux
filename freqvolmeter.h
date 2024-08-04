@@ -43,6 +43,7 @@ typedef struct {
 } sensor;
 
 typedef struct {
+	sensor* sens;
 	period_t period; //in usecs
 	volume_t volume;
 	ucounter_t serialno;

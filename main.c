@@ -36,10 +36,10 @@ int main(int argc, char** argv)
 			printf("RMS=%d per=%d acc=%d div=%d\n",
 				sensvalue[0].volume, sensvalue[0].period,
 				sensvalue[0].accuracy, sensvalue[0].period_divider);
-		else reset_sensor(&sensors[0]);
+		else reset_sensor(sensvalue[0].sens);
 		#endif
 		
-		perform_freqvol(&sensors[0], &sensvalue[0], &struny[0]);
+		perform_freqvol(&sensvalue[0], &struny[0]);
 		perform_send(&struny[0]);
 	}
 	return 0;

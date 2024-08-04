@@ -118,6 +118,7 @@ sensor_value* read_sensor(sensor* s, sensor_value* buf)
 		buf->serialno = s->serialno;
 		buf->period_divider = s->period_divider;
 		semaphore_post(s->sem);
+		buf->sens = s;
 		buf->errors = 0;
 		if (s->samplecounter - s->prev > PERIOD_TIMEOUT)
 			buf->errors =  ETIMEOUT;

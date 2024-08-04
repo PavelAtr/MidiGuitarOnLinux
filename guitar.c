@@ -71,10 +71,10 @@ byte_t normalize_velocity(int volume)
 	return velocity;
 }
 
-void perform_freqvol(sensor* sens, sensor_value* sensvalue, struna* str)
+void perform_freqvol(sensor_value* sensvalue, struna* str)
 {
 	if (sensvalue->errors || sensvalue->volume < VOLUME_NOISE)
-		reset_sensor(sens);
+		reset_sensor(sensvalue->sens);
 
 	if (sensvalue->serialno == str->serialno)
 		return;
