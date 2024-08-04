@@ -25,10 +25,12 @@ void adcprocess()
 	for (jack_nframes_t i = 0; i < ports_nframes; i++)
 	{
 		volume_t ADC = ADC_MAX * inputbuf[i] - ADC_ZERO_SIN;
-		s->volume_tmp += abs(ADC);
-		s->accuracy_tmp++;
 		s->samplecounter++;
-
+		if (s->measure)
+		{
+			s->volume_tmp += abs(ADC);
+			s->accuracy_tmp++;
+		}
 /*		if (ADC > ADC_ZERO_TRESHOLD)
 			s->comparator_zero = 1;
 		
@@ -58,11 +60,12 @@ void adcprocess()
 				s->prev_tmp = s->samplecounter;
 				s->volume_tmp = 0;
 				s->accuracy_tmp = 0;
-				s->zero_counter_tmp = 0;
+				s->measure = 1;
 			}
 			if (s->accuracy_tmp > PERIOD_ACCURACY_MIN)
 			{
 				s->ready = 1;
+				s->measure = 0;
 			}
 		}
 		
@@ -92,7 +95,6 @@ void adcprocess()
 				}
 			}
 		}
-
 	}
 	semaphore_post(s->sem);
 	s->overload = 0;

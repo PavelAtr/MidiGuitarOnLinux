@@ -22,8 +22,8 @@ typedef struct {
 	ulongcounter_t cur;
 	ucounter_t period_divider;
 	ucounter_t serialno;
-	flag_short_t ready;
-	flag_short_t overload;
+	bool_t ready;
+	bool_t overload;
 	semaphore_t sem;
 	
 	ulongcounter_t samplecounter;
@@ -34,12 +34,11 @@ typedef struct {
 	volume_long_t volume_tmp;
 	ucounter_t accuracy_tmp;
 	ucounter_t period_divider_tmp;
-	ucounter_t zero_counter_tmp;
 	ulongcounter_t cur_tmp;
 	ulongcounter_t prev_tmp;
-	flag_short_t comparator_zero;
-	flag_short_t comparator_max;
-	flag_short_t comparator_min;
+	bool_t comparator_max;
+	bool_t comparator_min;
+	bool_t measure;
 } sensor;
 
 typedef struct {

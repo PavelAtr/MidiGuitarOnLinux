@@ -21,7 +21,7 @@ typedef unsigned char errno_t;
 #define REALMIDI
 
 //#define DEBUGALG
-//#define DEBUGRAW
+#define DEBUGRAW
 //#define DEBUGMIDI
 
 #endif

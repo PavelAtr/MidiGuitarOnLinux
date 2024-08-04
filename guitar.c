@@ -100,6 +100,12 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 		// Nothing else
 		return;
 	}
+
+	#ifdef DEBUGRAW
+	printf("RMS=%d per=%d acc=%d div=%d\n",
+		sensvalue[0].volume, sensvalue[0].period,
+		sensvalue[0].accuracy, sensvalue[0].period_divider);
+	#endif
 	
 	flag_short_t flags = 0;
 
@@ -109,16 +115,23 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 	
 	if (str->newnote.index == -1) return;
 	
-	if (str->curvolume > str->oldvolume + 50)
+	if (str->curvolume > str->oldvolume + VOLUME_NEW_TRESHOLD)
+	{
+	// New note is louder
+		str->flags |= NOTE_LOUDER;
+	}
+	if (str->curvolume < str->oldvolume && str->flags & NOTE_LOUDER)
 	{
 	// New note is louder
 		flags |= NOTE_NEW;
+		str->flags &= ~NOTE_LOUDER;
 		#ifdef DEBUGALG
 		printf("New note %d as LOUDER, volume=%d period=%d\n",
 			str->newnote.index, str->curvolume, str->newnote.period);
 		#endif
 		goto end;
 	}
+
 	// Frequency after silence
 	if (str->flags & NOTE_SILENCE)
 	{
@@ -139,7 +152,7 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 			flags |= NOTE_NEWPITCH;
 			#ifdef DEBUGALG
 			#ifdef ENABLE_BENDS
-			printf("New pitch %d in same note\n", str->newnote.bend);
+//			printf("New pitch %d in same note\n", str->newnote.bend);
 			#endif
 			#endif
 			goto end;
@@ -177,7 +190,7 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 				flags |= NOTE_NEWPITCH;
 				#ifdef DEBUGALG
 				#ifdef ENABLE_BENDS
-				printf("New further pitch %d\n", newpitch);
+//				printf("New further pitch %d\n", newpitch);
 				#endif
 				#endif
 				goto end;
@@ -252,9 +265,9 @@ void perform_send(struna* str)
 		
 		#ifdef DEBUGMIDI
 		#ifdef ENABLE_BENDS	
-		printf("chn=%d PITCHNEW=%d MSB=%d LSB=%d\r\n",
-			str->channel, str->curnote.bend,
-			tmppitch.bendMSB, tmppitch.bendLSB);
+//		printf("chn=%d PITCHNEW=%d MSB=%d LSB=%d\r\n",
+//			str->channel, str->curnote.bend,
+//			tmppitch.bendMSB, tmppitch.bendLSB);
 		#endif
 		#endif
 		
