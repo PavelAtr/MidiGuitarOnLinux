@@ -73,22 +73,21 @@ byte_t normalize_velocity(int volume)
 
 void perform_freqvol(sensor* sens, sensor_value* sensvalue, struna* str)
 {
+	if (sensvalue->errors || sensvalue->volume < VOLUME_NOISE)
+		reset_sensor(sens);
+
 	if (sensvalue->serialno == str->serialno)
 		return;
 	else str->serialno = sensvalue->serialno;
 	
 	if (sensvalue->errors)
-	{
-		reset_sensor(sens);
 		return;
-	}
 
 	str->oldvolume = str->curvolume;
 	str->curvolume = sensvalue->volume;
 	
 	if (sensvalue->volume < VOLUME_NOISE)
 	{
-		reset_sensor(sens);
 		if (!(str->flags & NOTE_SILENCE))
 		{
 		// End note by volume if not silence

@@ -18,10 +18,10 @@ typedef unsigned char errno_t;
 
 #define ENABLE_BENDS
 #define ENABLE_SLIDES
-//#define REALMIDI
+#define REALMIDI
 
 //#define DEBUGALG
-#define DEBUGRAW
+//#define DEBUGRAW
 //#define DEBUGMIDI
 
 #endif
