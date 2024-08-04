@@ -54,7 +54,7 @@ typedef struct {
 extern struna struny[CHANNEL_NUM];
 
 void guitar_init();
-void perform_freqvol(sensor_value* sensvalue, struna* str);
+void perform_freqvol(sensor* sens, sensor_value* sensvalue, struna* str);
 void perform_send(struna* str);
 pitch* normalize_pitch(pitch* input, pitch_t bend);
 
