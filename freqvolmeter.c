@@ -9,7 +9,7 @@
 #include <string.h>
 
 sensor sensors[CHANNEL_NUM];
-ucounter_t PERIOD_ACCURACY_MIN;
+ucounter_t PERIOD_ACCURACY_MIN = 256;
 
 void adcprocess()
 {
@@ -105,8 +105,9 @@ void adcprocess()
 void freqvolmeter_init()
 {
 	extern_process = &adcprocess;
-	PERIOD_ACCURACY_MIN = ports_nframes;
 	memset(&sensors[0], 0x0, sizeof(sensor));
+	if (SAMPLERATE == 96000) PERIOD_ACCURACY_MIN = 512;
+	if (SAMPLERATE == 192000) PERIOD_ACCURACY_MIN = 1024;
 }
 
 sensor_value* read_sensor(sensor* s, sensor_value* buf)
