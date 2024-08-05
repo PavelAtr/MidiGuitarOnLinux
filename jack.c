@@ -79,7 +79,7 @@ void jack_init(void)
 	
 	for (ucounter_t	i = 0; i < CHANNEL_NUM; i++)
 	{
-		sprintf(inputs[i].name, "input%d", i);
+		sprintf(inputs[i].name, "input%d", i + 1);
 		inputs[i].input_port = jack_port_register (client, inputs[i].name,
 						JACK_DEFAULT_AUDIO_TYPE,
 						JackPortIsInput, 0);

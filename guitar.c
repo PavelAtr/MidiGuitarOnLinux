@@ -104,9 +104,9 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 
 	if (debug_raw)
 	{
-		printf("RMS=%d per=%d acc=%d div=%d\n",
-			sensvalue[0].volume, sensvalue[0].period,
-			sensvalue[0].accuracy, sensvalue[0].period_divider);
+		printf("chn=%d RMS=%d per=%d acc=%d div=%d\n",
+			str->channel, sensvalue->volume, sensvalue->period,
+			sensvalue->accuracy, sensvalue->period_divider);
 	}
 	
 	flag_short_t flags = 0;
