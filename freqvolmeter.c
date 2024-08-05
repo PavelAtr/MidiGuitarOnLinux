@@ -109,8 +109,6 @@ void freqvolmeter_init()
 sensor_value* read_sensor(sensor* s, sensor_value* buf)
 {
 		semaphore_wait(s->sem);
-		if (s->overload)
-			printf("OVERLOAD\n");
 		buf->period =  (s->period_divider > 1)?
 			(s->cur - s->prev) * 1000000 /
 			((s->period_divider - 1) * SAMPLERATE) 
