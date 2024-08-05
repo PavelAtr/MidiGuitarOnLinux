@@ -15,6 +15,7 @@ typedef struct {
 	} note;
 
 typedef struct {
+	volume_t volume_max;
 	volume_t curvolume;
 	volume_t oldvolume;
 	byte_t channel;
@@ -44,10 +45,8 @@ typedef struct {
 #define PITCH_TRESHOLD 30 // in %, note pitched and not be slided
 #define PITCH_STEP 10 // in %, to reduce event count
 #define PITCH_FURTHER 300 //in %, after this pitch new note occur
-#define VOLUME_MAX 5000
-#define VOLUME_NEW_TRESHOLD VOLUME_MAX * 2 / 100
-#define VOLUME_NOISE 100 //in ADC points
-#define SERIAL_IS_NEW 50
+#define VOLUME_NEW_TRESHOLD(volume_max) volume_max * 1 / 100
+#define VOLUME_NOISE(volume_max) volume_max * 2 / 100
 
 
 

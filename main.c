@@ -6,6 +6,7 @@
 #include "midi.h"
 #include "freqvolmeter.h"
 #include "guitar.h"
+#include "cli.h"
 
 
 void guitar_baner(void)
@@ -23,9 +24,11 @@ void guitar_baner(void)
 
 int main(int argc, char** argv)
 {
+	cli_init(argc, argv);
 	jack_init();
 	freqvolmeter_init();
 	guitar_init();
+	
 	while(1) 
 	{
 		sensor_value sensvalue[CHANNEL_NUM];
