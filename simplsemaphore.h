@@ -5,7 +5,6 @@
 typedef volatile unsigned char semaphore_t;
 
 #define semaphore_wait(sem) while(sem); sem = 1;
-#define semaphore_waitsleep(sem) while(sem) usleep(1); sem = 1;
 #define semaphore_post(sem) sem = 0;
 
 #endif

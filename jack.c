@@ -54,7 +54,7 @@ int process (jack_nframes_t nframes, void *arg)
 
 void sendmidi(size_t len, char* buf)
 {
-	semaphore_waitsleep(midisem);
+	semaphore_wait(midisem);
 	if (midindx < MIDI_BUFFER_LEN)
 	{
 		for (size_t i = 0; i < len; i++)
