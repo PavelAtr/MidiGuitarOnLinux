@@ -15,13 +15,8 @@ void adcprocess()
 {
 	sensor* s = &sensors[0];
 	
-	if (!s->overload)
-	{
-		semaphore_wait(s->sem);
-	}
-	else
+	if (s->overload)
 		printf("OVERLOAD!\r\n");
-
 	s->overload = 1;
 		
 	for (jack_nframes_t i = 0; i < ports_nframes; i++)
@@ -86,6 +81,7 @@ void adcprocess()
 				}
 				if (s->ready)
 				{
+					semaphore_wait(s->sem);
 					s->ready = 0;
 					s->serialno++;
 					s->prev = s->prev_tmp;
@@ -94,11 +90,11 @@ void adcprocess()
 					s->accuracy = s->accuracy_tmp;
 					s->period_divider = s->period_divider_tmp;
 					s->period_divider_tmp = 0;
+					semaphore_post(s->sem);
 				}
 			}
 		}
 	}
-	semaphore_post(s->sem);
 	s->overload = 0;
 }
 
@@ -112,7 +108,9 @@ void freqvolmeter_init()
 
 sensor_value* read_sensor(sensor* s, sensor_value* buf)
 {
-		semaphore_waitsleep(s->sem);
+		semaphore_wait(s->sem);
+		if (s->overload)
+			printf("OVERLOAD\n");
 		buf->period =  (s->period_divider > 1)?
 			(s->cur - s->prev) * 1000000 /
 			((s->period_divider - 1) * SAMPLERATE) 

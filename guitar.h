@@ -21,7 +21,7 @@ typedef struct {
 	byte_t channel;
 	ucounter_t serialno;
 	flag_short_t note_flags;
-	flag_short_t check_flags;
+	flag_short_t doublecheck;
 	note oldnote;
 	note curnote;
 	note newnote;
@@ -33,7 +33,7 @@ typedef struct {
 #define NOTE_NEWPITCH 0x04
 #define NOTE_SILENCE 0x08
 #define NOTE_LOUDER 0x10
-// check flags:
+// doublecheck flags:
 #define CHECK_AFTERSILENCE	0x01
 #define CHECK_NEWFREQUENCY 0x02
 #define CHECK_FURTHERPITCH 0x04
