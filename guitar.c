@@ -91,12 +91,12 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 	
 	if (sensvalue->volume < VOLUME_NOISE(str->volume_max))
 	{
-		if (!(str->flags & NOTE_SILENCE))
+		if (!(str->note_flags & NOTE_SILENCE))
 		{
 		// End note by volume if not silence
 			if (debug_alg) printf("End note by volume\n");
 			note_copy(&str->oldnote, &str->curnote);
-			str->flags |= NOTE_END;
+			str->note_flags |= NOTE_END;
 		}
 		// Nothing else
 		return;
@@ -120,14 +120,14 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 	if (str->curvolume - str->oldvolume > VOLUME_NEW_TRESHOLD(str->volume_max))
 	{
 	// New note is louder
-		str->flags |= NOTE_LOUDER;
+		str->note_flags |= NOTE_LOUDER;
 		goto end;
 	}
-	if (str->curvolume < str->oldvolume && str->flags & NOTE_LOUDER)
+	if (str->curvolume < str->oldvolume && str->note_flags & NOTE_LOUDER)
 	{
 	// New note is louder
 		flags |= NOTE_NEW;
-		str->flags &= ~NOTE_LOUDER;
+		str->note_flags &= ~NOTE_LOUDER;
 		if (debug_alg)
 			printf("New note %d as LOUDER, volume=%d period=%d\n",
 				str->newnote.index, str->curvolume, str->newnote.period);
@@ -135,7 +135,7 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 	}
 
 	// Frequency after silence
-	if (str->flags & NOTE_SILENCE)
+	if (str->note_flags & NOTE_SILENCE)
 	{
 		flags |=  NOTE_NEW;
 		if (debug_alg)
@@ -201,12 +201,12 @@ end:
 		str->curnote.volume = sensvalue->volume;
 		str->curnote.accuracy = sensvalue->accuracy;
 		str->curnote.serialno = sensvalue->serialno;
-		str->flags |= NOTE_NEW | NOTE_NEWPITCH;
-		if (!(str->flags & NOTE_SILENCE))
-			str->flags |= NOTE_END;
+		str->note_flags |= NOTE_NEW | NOTE_NEWPITCH;
+		if (!(str->note_flags & NOTE_SILENCE))
+			str->note_flags |= NOTE_END;
 	}
-	if ((flags & NOTE_NEWPITCH) && !(str->flags & NOTE_SILENCE))
-		str->flags |= NOTE_NEWPITCH;
+	if ((flags & NOTE_NEWPITCH) && !(str->note_flags & NOTE_SILENCE))
+		str->note_flags |= NOTE_NEWPITCH;
 }
 
 char tmp[30];
@@ -215,7 +215,7 @@ void perform_send(struna* str)
 {
 	pitch tmppitch;
 	
-	if (str->flags & NOTE_END)
+	if (str->note_flags & NOTE_END)
 	{
 		if (enable_midi)
 			midiNoteOffOut(str->oldnote.index + STARTMIDINOTE,
@@ -227,10 +227,10 @@ void perform_send(struna* str)
 				normalize_velocity(str, str->oldnote.volume),
 				str->oldnote.period);
 
-		str->flags &= ~NOTE_END;
-		str->flags |= NOTE_SILENCE;
+		str->note_flags &= ~NOTE_END;
+		str->note_flags |= NOTE_SILENCE;
 	}
-	if (str->flags & NOTE_NEW)
+	if (str->note_flags & NOTE_NEW)
 	{
 		if (enable_midi)
 			midiNoteOnOut(str->curnote.index + STARTMIDINOTE,
@@ -242,10 +242,10 @@ void perform_send(struna* str)
 				normalize_velocity(str, str->curnote.volume),
 				str->curnote.period, str->curnote.accuracy, str->curnote.volume, str->curvolume, str->oldvolume);
 
-		str->flags &= ~NOTE_NEW;
-		str->flags &= ~NOTE_SILENCE;
+		str->note_flags &= ~NOTE_NEW;
+		str->note_flags &= ~NOTE_SILENCE;
 	}
-	if (str->flags & NOTE_NEWPITCH)
+	if (str->note_flags & NOTE_NEWPITCH)
 	{
 		normalize_pitch(&tmppitch, str->curnote.bend);
 		
@@ -260,11 +260,12 @@ void perform_send(struna* str)
 //					str->channel, str->curnote.bend,
 //					tmppitch.bendMSB, tmppitch.bendLSB);
 		
-		str->flags &= ~NOTE_NEWPITCH;
+		str->note_flags &= ~NOTE_NEWPITCH;
 	}
 }
 
 void guitar_init()
 {
 	struny[0].channel = 0;
+	struny[0].volume_max = VOLUME_MAX_DEFAULT;
 }

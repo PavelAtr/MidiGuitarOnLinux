@@ -20,18 +20,23 @@ typedef struct {
 	volume_t oldvolume;
 	byte_t channel;
 	ucounter_t serialno;
-	flag_short_t flags;
+	flag_short_t note_flags;
+	flag_short_t check_flags;
 	note oldnote;
 	note curnote;
 	note newnote;
 	} struna;
 
-// flags:
+// note flags:
 #define NOTE_NEW 0x01
 #define NOTE_END 0x02
 #define NOTE_NEWPITCH 0x04
 #define NOTE_SILENCE 0x08
 #define NOTE_LOUDER 0x10
+// check flags:
+#define CHECK_AFTERSILENCE	0x01
+#define CHECK_NEWFREQUENCY 0x02
+#define CHECK_FURTHERPITCH 0x04
 
 typedef struct {
 	pitch_t realpitch;
@@ -45,6 +50,7 @@ typedef struct {
 #define PITCH_TRESHOLD 30 // in %, note pitched and not be slided
 #define PITCH_STEP 10 // in %, to reduce event count
 #define PITCH_FURTHER 300 //in %, after this pitch new note occur
+#define VOLUME_MAX_DEFAULT 2000 //in ADC points
 #define VOLUME_NEW_TRESHOLD(volume_max) volume_max * 1 / 100
 #define VOLUME_NOISE(volume_max) volume_max * 2 / 100
 
