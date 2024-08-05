@@ -16,7 +16,9 @@ void adcprocess()
 	sensor* s = &sensors[0];
 	
 	if (!s->overload)
-		s->sem = 1;
+	{
+		semaphore_wait(s->sem);
+	}
 	else
 		printf("OVERLOAD!\r\n");
 

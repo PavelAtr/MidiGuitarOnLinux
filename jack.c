@@ -32,7 +32,7 @@ int process (jack_nframes_t nframes, void *arg)
 
 	extern_process();
 	
-	midisem = 1;
+	semaphore_wait(midisem);
 	void* out = jack_port_get_buffer(midi_port, nframes);
 	jack_midi_clear_buffer(out);
 
