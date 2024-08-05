@@ -32,9 +32,12 @@ int main(int argc, char** argv)
 	while(1) 
 	{
 		sensor_value sensvalue[CHANNEL_NUM];
-		read_sensor(&sensors[0], &sensvalue[0]);
-		perform_freqvol(&sensvalue[0], &struny[0]);
-		perform_send(&struny[0]);
+		for (ucounter_t i = 0; i < CHANNEL_NUM; i++)
+		{
+			read_sensor(&sensors[i], &sensvalue[i]);
+			perform_freqvol(&sensvalue[i], &struny[i]);
+			perform_send(&struny[i]);
+		}
 		usleep(100);
 	}
 	return 0;

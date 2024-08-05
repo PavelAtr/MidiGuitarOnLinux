@@ -1,7 +1,7 @@
 #ifndef _MAIN_H
 #define _MAIN_H
 
-#define CHANNEL_NUM 1
+#define CHANNEL_NUM 6
 
 //******** Types: **********
 typedef unsigned int period_t;

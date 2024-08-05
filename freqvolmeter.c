@@ -10,18 +10,13 @@
 
 sensor sensors[CHANNEL_NUM];
 ucounter_t PERIOD_ACCURACY_MIN = 256;
+bool_t overload;
 
-void adcprocess()
+void adcperform(sensor* s, input* in)
 {
-	sensor* s = &sensors[0];
-	
-	if (s->overload)
-		printf("OVERLOAD!\r\n");
-	s->overload = 1;
-		
-	for (jack_nframes_t i = 0; i < ports_nframes; i++)
+	for (jack_nframes_t i = 0; i < in->ports_nframes; i++)
 	{
-		volume_t ADC = ADC_MAX * inputbuf[i] - ADC_ZERO_SIN;
+		volume_t ADC = ADC_MAX * in->inputbuf[i] - ADC_ZERO_SIN;
 		s->samplecounter++;
 		if (s->measure)
 		{
@@ -95,7 +90,18 @@ void adcprocess()
 			}
 		}
 	}
-	s->overload = 0;
+}
+
+void adcprocess()
+{
+	if (overload)
+		printf("OVERLOAD!\r\n");
+	overload = 1;
+
+	for (ucounter_t i = 0; i < CHANNEL_NUM; i++)
+		adcperform(&sensors[i], &inputs[i]);
+	
+	overload = 0;
 }
 
 void freqvolmeter_init()

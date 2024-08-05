@@ -11,14 +11,11 @@
 #include "main.h"
 #include "simplsemaphore.h"
 
-jack_port_t* input_port;
 jack_port_t* midi_port;
 jack_client_t* client;
 
 unsigned int SAMPLERATE;
-jack_default_audio_sample_t* inputbuf;
-jack_nframes_t ports_nframes;
-semaphore_t midisem = 0;
+input inputs[CHANNEL_NUM];semaphore_t midisem = 0;
 midi_packet* midibuf;
 size_t midindx = 0;
 
@@ -28,7 +25,8 @@ void (*extern_process)() = &dummy;
 
 int process (jack_nframes_t nframes, void *arg)
 {
-	inputbuf  = jack_port_get_buffer(input_port, nframes);
+	for (ucounter_t i = 0; i < CHANNEL_NUM; i++)
+		inputs[i].inputbuf  = jack_port_get_buffer(inputs[i].input_port, nframes);
 
 	extern_process();
 	
@@ -78,17 +76,20 @@ void jack_init(void)
 	client = jack_client_open(client_name, options, &status, server_name);
 	if (client == NULL)
 		error(EBUSY, EBUSY, "jack connection fail\n");
-		
-	input_port = jack_port_register (client, "input",
-					 JACK_DEFAULT_AUDIO_TYPE,
-					 JackPortIsInput, 0);
+	
+	for (ucounter_t	i = 0; i < CHANNEL_NUM; i++)
+	{
+		sprintf(inputs[i].name, "input%d", i);
+		inputs[i].input_port = jack_port_register (client, inputs[i].name,
+						JACK_DEFAULT_AUDIO_TYPE,
+						JackPortIsInput, 0);
+	 	if (inputs[i].input_port == NULL)
+			error(EBUSY, EBUSY, "jack input port fail\n");
+	}
 
 	midi_port = jack_port_register (client, "midioutput",
 					  JACK_DEFAULT_MIDI_TYPE,
 					  JackPortIsOutput, 0);
-
-	if (input_port == NULL)
-		error(EBUSY, EBUSY, "jack input port fail\n");
 		
 	if (midi_port == NULL)
 		error(EBUSY, EBUSY, "jack midi port fail\n");
@@ -99,7 +100,9 @@ void jack_init(void)
 		error(EBUSY, EBUSY, "jack activate fail\n");
 	
 	SAMPLERATE = jack_get_sample_rate (client);
-	ports_nframes = jack_get_buffer_size(client);
+	jack_nframes_t ports_nframes = jack_get_buffer_size(client);
+	for (ucounter_t i = 0; i < CHANNEL_NUM; i++)
+		inputs[i].ports_nframes = ports_nframes;
 	
 	midibuf = malloc(sizeof(char) * ports_nframes);
 	assert(midibuf);

@@ -11,8 +11,16 @@ void jack_init(void);
 extern void (*extern_process)();
 
 extern unsigned int SAMPLERATE;
-extern jack_default_audio_sample_t* inputbuf;
-extern jack_nframes_t ports_nframes;
+
+typedef struct
+{
+	char name[20];
+	jack_port_t* input_port;
+	jack_default_audio_sample_t* inputbuf;
+	jack_nframes_t ports_nframes;
+} input;
+
+extern input inputs[CHANNEL_NUM];
 
 void sendmidi(size_t len, char* buf);
 

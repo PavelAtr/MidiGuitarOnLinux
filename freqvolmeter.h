@@ -23,7 +23,6 @@ typedef struct {
 	ucounter_t period_divider;
 	ucounter_t serialno;
 	bool_t ready;
-	bool_t overload;
 	semaphore_t sem;
 	
 	ulongcounter_t samplecounter;

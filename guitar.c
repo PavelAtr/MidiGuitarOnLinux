@@ -266,6 +266,9 @@ void perform_send(struna* str)
 
 void guitar_init()
 {
-	struny[0].channel = 0;
-	struny[0].volume_max = VOLUME_MAX_DEFAULT;
+	for (ucounter_t i = 0; i < CHANNEL_NUM; i++)
+	{
+		struny[i].channel = i;
+		struny[i].volume_max = VOLUME_MAX_DEFAULT;
+	}
 }
