@@ -32,7 +32,7 @@ int main(int argc, char** argv)
 		read_sensor(&sensors[0], &sensvalue[0]);
 		perform_freqvol(&sensvalue[0], &struny[0]);
 		perform_send(&struny[0]);
-		usleep(5000);
+		usleep(100);
 	}
 	return 0;
 }

@@ -119,6 +119,7 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 	{
 	// New note is louder
 		str->flags |= NOTE_LOUDER;
+		goto end;
 	}
 	if (str->curvolume < str->oldvolume && str->flags & NOTE_LOUDER)
 	{
