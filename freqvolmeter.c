@@ -20,14 +20,7 @@ void adcperform(sensor* s, volume_t ADC)
 			s->volume_tmp += abs(ADC);
 			s->accuracy_tmp++;
 		}
-/*		if (ADC > ADC_ZERO_TRESHOLD)
-			s->comparator_zero = 1;
-		
-		if (ADC < - ADC_ZERO_TRESHOLD && s->comparator_zero)
-		{
-			s->comparator_zero = 0;
-		}
-*/
+
 		if (ADC > s->volume_max)
 		{
 			s->volume_max = ADC;
