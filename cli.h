@@ -2,7 +2,7 @@
 #define _CLI_H
 #include "main.h"
 
-void cli_init(int argc, char** argv);
+int cli_init(int argc, char** argv);
 
 extern bool_t enable_midi;
 extern bool_t enable_bends;

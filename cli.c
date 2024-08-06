@@ -14,10 +14,16 @@ bool_t debug_alg = 0;
 
 void usage(void)
 {
-	printf("Usage: under construction\n");
+	printf("Usage:\n"
+"--midi\t\tenable midi output\n"
+"--bends\t\tenable bends\n"
+"--slides\tenable slides\n"
+"--debug-alg\tdebug algorythm\n"
+"--debug-raw\tdebug measurments\n"
+"--debug-midi\tdebug midi protocol\n");
 }
 
-void cli_init(int argc, char** argv)
+int cli_init(int argc, char** argv)
 {
 	int c;
 
@@ -62,5 +68,10 @@ void cli_init(int argc, char** argv)
     
     if (!enable_midi && !enable_bends && !enable_slides && !debug_raw
 		&& !debug_midi && !debug_alg)
+	{
 		usage();
+		return 1;
+	}
+	
+	return 0;
 }

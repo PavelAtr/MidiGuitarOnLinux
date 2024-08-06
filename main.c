@@ -24,7 +24,7 @@ void guitar_baner(void)
 
 int main(int argc, char** argv)
 {
-	cli_init(argc, argv);
+	if (cli_init(argc, argv)) return 1;
 	jack_init();
 	freqvolmeter_init();
 	guitar_init();
