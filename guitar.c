@@ -12,14 +12,14 @@ struna struny[CHANNEL_NUM];
 pitch_t search_pitch(note* inp, period_t period)
 {
 	pitch_t bend;
-	if (notes[inp->index] >= period)
+	if (notes[inp->index].period >= period)
 	{
-		bend = (notes[inp->index] - period) * 100 /
-			(notes[inp->index] - notes[inp->index + 1]);
+		bend = (notes[inp->index].period - period) * 100 /
+			(notes[inp->index].period - notes[inp->index + 1].period);
 	}
 	else
 	{
-		bend = -((period - notes[inp->index]) * 100 / (notes[inp->index - 1] - notes[inp->index]));
+		bend = -((period - notes[inp->index].period) * 100 / (notes[inp->index - 1].period - notes[inp->index].period));
 
 	}
 	return bend;
@@ -29,9 +29,9 @@ note* search_note(note* inp)
 {
 	for (int i = 0; i < NUMNOTES - 1; i++)
 	{
-		if (inp->period <= notes[i] && inp->period > notes[i + 1])
+		if (inp->period <= notes[i].period && inp->period > notes[i + 1].period)
 		{
-			if (notes[i] - inp->period <= inp->period - notes[i + 1])
+			if (notes[i].period - inp->period <= inp->period - notes[i + 1].period)
 				inp->index = i;
 			else
 				inp->index = i + 1;
@@ -114,6 +114,9 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 	// Searching note in array frequencys
 	str->newnote.period = sensvalue->period;
 	search_note(&str->newnote);
+	
+	if (enable_tuning)
+		printf("%s\t%d%\n", notes[str->newnote.index].name, str->newnote.bend);
 	
 	if (str->newnote.index == -1) return;
 	

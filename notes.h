@@ -5,6 +5,12 @@
 #define NUMNOTES 88
 #define STARTMIDINOTE 21
 
-extern const period_t notes[NUMNOTES]; //in usecs
+typedef struct
+{
+	period_t period;
+	char* name;
+} key;
+
+extern const key notes[NUMNOTES]; //in usecs
 
 #endif

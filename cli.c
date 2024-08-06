@@ -11,6 +11,7 @@ bool_t enable_slides = 0;
 bool_t debug_raw = 0;
 bool_t debug_midi = 0;
 bool_t debug_alg = 0;
+bool_t enable_tuning = 0;
 
 void usage(void)
 {
@@ -18,6 +19,7 @@ void usage(void)
 "--midi\t\tenable midi output\n"
 "--bends\t\tenable bends\n"
 "--slides\tenable slides\n"
+"--tuning\ttuning mode\n"
 "--debug-alg\tdebug algorythm\n"
 "--debug-raw\tdebug measurments\n"
 "--debug-midi\tdebug midi protocol\n");
@@ -34,9 +36,11 @@ int cli_init(int argc, char** argv)
                    {"midi",    no_argument, 0,  0 },
                    {"bends",  no_argument, 0,  0 },
                    {"slides",  no_argument, 0,  0 },
+                   {"tuning",  no_argument, 0,  0 },
                    {"debug-alg",  no_argument, 0,  0 },
                    {"debug-raw",  no_argument, 0,  0 },
                    {"debug-midi",  no_argument, 0,  0 },
+                   
                    {0, 0, 0, 0 }
         };
 
@@ -60,6 +64,8 @@ int cli_init(int argc, char** argv)
 					debug_raw = 1;
 				if (strcmp(long_options[option_index].name, "debug-midi") == 0)
 					debug_midi = 1;
+				if (strcmp(long_options[option_index].name, "tuning") == 0)
+					enable_tuning = 1;
                 break;
             default:
                 break;;

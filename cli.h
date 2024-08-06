@@ -10,5 +10,6 @@ extern bool_t enable_slides;
 extern bool_t debug_raw;
 extern bool_t debug_midi;
 extern bool_t debug_alg;
+extern bool_t enable_tuning;
 
 #endif
