@@ -12,11 +12,8 @@ sensor sensors[CHANNEL_NUM];
 ucounter_t PERIOD_ACCURACY_MIN = 256;
 bool_t overload;
 
-void adcperform(sensor* s, input* in)
+void adcperform(sensor* s, volume_t ADC)
 {
-	for (jack_nframes_t i = 0; i < in->ports_nframes; i++)
-	{
-		volume_t ADC = ADC_MAX * in->inputbuf[i] - ADC_ZERO_SIN;
 		s->samplecounter++;
 		if (s->measure)
 		{
@@ -89,7 +86,6 @@ void adcperform(sensor* s, input* in)
 				}
 			}
 		}
-	}
 }
 
 void adcprocess()
@@ -98,8 +94,9 @@ void adcprocess()
 		printf("OVERLOAD!\r\n");
 	overload = 1;
 
-	for (ucounter_t i = 0; i < CHANNEL_NUM; i++)
-		adcperform(&sensors[i], &inputs[i]);
+	for (jack_nframes_t j = 0; j < inputs[0].ports_nframes; j++)
+		for (ucounter_t i = 0; i < CHANNEL_NUM; i++)
+			adcperform(&sensors[i], ADC_MAX * inputs[i].inputbuf[j] - ADC_ZERO_SIN);
 	
 	overload = 0;
 }
