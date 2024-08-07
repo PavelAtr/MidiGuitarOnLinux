@@ -150,11 +150,11 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 	if (str->curvolume > str->oldvolume + VOLUME_NEW_TRESHOLD)
 	{
 	// New note is louder
-		str->curlouder = str->curvolume;
-		str->oldlouder = str->oldvolume;
-		str->note_flags |= NOTE_LOUDER;
-		
-		goto end;
+		if (enable_tremolo)
+		{
+			str->note_flags |= NOTE_LOUDER;
+			goto end;
+		}
 	}
 	if (str->curvolume < str->oldvolume && str->note_flags & NOTE_LOUDER)
 	{

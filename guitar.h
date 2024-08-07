@@ -18,8 +18,6 @@ typedef struct {
 //	volume_t volume_max;
 	volume_t curvolume;
 	volume_t oldvolume;
-	volume_t curlouder;
-	volume_t oldlouder;
 	byte_t channel;
 	ucounter_t serialno;
 	flag_short_t note_flags;
@@ -50,7 +48,7 @@ typedef struct {
 // Constatnts:
 #define PITCH_MAX 200//in %, 0.5 tone = 100%
 #define PITCH_MIN -200 //in %
-#define PITCH_TRESHOLD 30 // in %, note pitched and not be slided
+#define PITCH_TRESHOLD 60 // in %, note pitched and not be slided
 #define PITCH_STEP 10 // in %, to reduce event count
 #define PITCH_FURTHER 300 //in %, after this pitch new note occur
 #define VOLUME_MAX_DEFAULT 14000 //in ADC points

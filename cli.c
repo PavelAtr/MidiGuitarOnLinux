@@ -8,6 +8,7 @@
 bool_t enable_midi = 0;
 bool_t enable_bends = 0;
 bool_t enable_slides = 0;
+bool_t enable_tremolo = 0;
 bool_t debug_raw = 0;
 bool_t debug_midi = 0;
 bool_t debug_alg = 0;
@@ -19,6 +20,7 @@ void usage(void)
 "--midi\t\tenable midi output\n"
 "--bends\t\tenable bends\n"
 "--slides\tenable slides\n"
+"--tremolo\tenable tremolo\n"
 "--tuning\ttuning mode\n"
 "--debug-alg\tdebug algorythm\n"
 "--debug-raw\tdebug measurments\n"
@@ -36,6 +38,7 @@ int cli_init(int argc, char** argv)
                    {"midi",    no_argument, 0,  0 },
                    {"bends",  no_argument, 0,  0 },
                    {"slides",  no_argument, 0,  0 },
+                   {"tremolo",  no_argument, 0,  0 },
                    {"tuning",  no_argument, 0,  0 },
                    {"debug-alg",  no_argument, 0,  0 },
                    {"debug-raw",  no_argument, 0,  0 },
@@ -58,6 +61,8 @@ int cli_init(int argc, char** argv)
 					enable_bends = 1;
 				if (strcmp(long_options[option_index].name, "slides") == 0)
 					enable_slides = 1;
+				if (strcmp(long_options[option_index].name, "tremolo") == 0)
+					enable_tremolo = 1;
 				if (strcmp(long_options[option_index].name, "debug-alg") == 0)
 					debug_alg = 1;
 				if (strcmp(long_options[option_index].name, "debug-raw") == 0)
@@ -73,7 +78,7 @@ int cli_init(int argc, char** argv)
     }
     
     if (!enable_midi && !enable_bends && !enable_slides && !debug_raw
-		&& !debug_midi && !debug_alg)
+		&& !debug_midi && !debug_alg && !enable_tuning && !enable_tremolo)
 	{
 		usage();
 		return 1;
