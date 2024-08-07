@@ -15,6 +15,11 @@ bool_t overload;
 void adcperform(sensor* s, volume_t ADC)
 {
 		s->samplecounter++;
+		if (s->measure)
+		{
+			s->volume_tmp += abs(ADC);
+			s->accuracy_tmp++;
+		}
 
 		if (ADC > s->volume_max)
 		{
@@ -73,12 +78,6 @@ void adcperform(sensor* s, volume_t ADC)
 					semaphore_post(s->sem);
 				}
 			}
-		}
-
-		if (s->measure)
-		{
-			s->volume_tmp += abs(ADC);
-			s->accuracy_tmp++;
 		}
 }
 

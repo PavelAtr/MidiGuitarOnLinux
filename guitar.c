@@ -75,32 +75,6 @@ byte_t normalize_velocity(struna* str, int volume)
 
 void perform_freqvol(sensor_value* sensvalue, struna* str)
 {
-	if (sensvalue->errors || sensvalue->volume < VOLUME_NOISE)
-		reset_sensor(sensvalue->sens);
-
-	if (sensvalue->serialno == str->serialno)
-		return;
-	else str->serialno = sensvalue->serialno;
-	
-	if (sensvalue->errors)
-		return;
-
-	str->oldvolume = str->curvolume;
-	str->curvolume = sensvalue->volume;
-	
-	if (sensvalue->volume < VOLUME_NOISE)
-	{
-		if (!(str->note_flags & NOTE_SILENCE))
-		{
-		// End note by volume if not silence
-			if (debug_alg) printf("End note by volume\n");
-			note_copy(&str->oldnote, &str->curnote);
-			str->note_flags |= NOTE_END;
-		}
-		// Nothing else
-		return;
-	}
-
 	if (debug_raw)
 	{
 		if (sensvalue->volume > volume_max) volume_max = sensvalue->volume;
@@ -112,7 +86,35 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 			printf(" LOUDER=%d\n", str->curvolume - str->oldvolume);
 		else
 			printf("\n");
+	}
 
+	if (sensvalue->errors)
+		reset_sensor(sensvalue->sens);
+
+	if (sensvalue->serialno == str->serialno)
+		return;
+	else str->serialno = sensvalue->serialno;
+	
+	if (sensvalue->errors)
+		return;
+
+	str->oldvolume = str->curvolume;
+	str->curvolume = sensvalue->volume;
+
+	if (sensvalue->volume < VOLUME_NOISE)
+	{
+		if (!(str->note_flags & NOTE_SILENCE))
+		{
+		// End note by volume if not silence
+			if (debug_alg)
+			{
+				printf("End note by volume\n");
+			}
+			note_copy(&str->oldnote, &str->curnote);
+			str->note_flags |= NOTE_END;
+		}
+		// Nothing else
+		return;
 	}
 	
 	flag_short_t flags = 0;
@@ -273,30 +275,35 @@ void perform_send(struna* str)
 	if (str->note_flags & NOTE_END)
 	{
 		if (enable_midi)
+		{
 			midiNoteOffOut(str->oldnote.index + STARTMIDINOTE,
 				normalize_velocity(str, str->oldnote.volume), str->channel);
+		}
 		
 		if (debug_midi)
+		{
 			printf("chn=%d note END=%d velocity=%d period=%d\r\n",
 				str->channel, str->oldnote.index + STARTMIDINOTE,
 				normalize_velocity(str, str->oldnote.volume),
 				str->oldnote.period);
-
+		}
 		str->note_flags &= ~NOTE_END;
 		str->note_flags |= NOTE_SILENCE;
 	}
 	if (str->note_flags & NOTE_NEW)
 	{
 		if (enable_midi)
+		{
 			midiNoteOnOut(str->curnote.index + STARTMIDINOTE,
 				normalize_velocity(str, str->curnote.volume), str->channel);
-		
+		}
 		if (debug_midi)
+		{
 			printf("chn=%d note NEW=%d velocity=%d period=%d accuracy=%d volume=%d cur=%d old=%d\r\n",
 				str->channel, str->curnote.index  + STARTMIDINOTE,
 				normalize_velocity(str, str->curnote.volume),
 				str->curnote.period, str->curnote.accuracy, str->curnote.volume, str->curvolume, str->oldvolume);
-
+		}
 		str->note_flags &= ~NOTE_NEW;
 		str->note_flags &= ~NOTE_SILENCE;
 	}
@@ -305,16 +312,21 @@ void perform_send(struna* str)
 		normalize_pitch(&tmppitch, str->curnote.bend);
 		
 		if (enable_midi)
+		{
 			if (enable_bends)
+			{
 				midiPitchBendOut(tmppitch.bendLSB, tmppitch.bendMSB, str->channel);
-		
+			}
+		}
 		if (debug_midi)
+		{
 			if (enable_bends)
-			;
+			{
 //				printf("chn=%d PITCHNEW=%d MSB=%d LSB=%d\r\n",
 //					str->channel, str->curnote.bend,
 //					tmppitch.bendMSB, tmppitch.bendLSB);
-		
+			}
+		}
 		str->note_flags &= ~NOTE_NEWPITCH;
 	}
 }

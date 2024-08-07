@@ -4,7 +4,7 @@
 #include "jack.h"
 #include "simplsemaphore.h"
 
-#define PERIOD_MAX 40000 // in usecs
+#define PERIOD_MAX 80000 // in usecs
 #define PERIOD_MIN 200 // in usecs
 #define PERIOD_TIMEOUT PERIOD_MAX * SAMPLERATE / 1000000 //in samples
 #define ADC_MAX 0xFFFF //in ADC points
