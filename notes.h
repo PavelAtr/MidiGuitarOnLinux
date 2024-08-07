@@ -3,7 +3,7 @@
 #include "main.h"
 
 #define NUMNOTES 88
-#define STARTMIDINOTE 21
+#define STARTMIDINOTE 22
 
 typedef struct
 {
