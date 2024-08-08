@@ -15,4 +15,6 @@ typedef char byte_t;
 typedef char bool_t;
 typedef unsigned char errno_t;
 
+#define EVENT_DOUBLECHECK
+
 #endif

@@ -12,12 +12,14 @@
 #define ADC_ZERO_TRESHOLD 10 //in ASDC points
 #define ADC_MAX_RMS (ADC_MAX * 0.638) //in ADC points
 #define SUSTAIN_FACTOR 0.8 //0 ... 1 float
-#define PERIOD_ACCURACY_DIFF 10 // period accuracy error %
 
 
 typedef struct {
 	volume_long_t volume;
 	ucounter_t accuracy; //in 1/samplerate points
+	volume_long_t volume_approx;
+	ucounter_t accuracy_approx;
+	volume_t volume_max_redy;
 	ulongcounter_t prev;
 	ulongcounter_t cur;
 	ucounter_t period_divider;
@@ -37,6 +39,7 @@ typedef struct {
 	ulongcounter_t prev_tmp;
 	bool_t comparator_max;
 	bool_t comparator_min;
+	bool_t comparator_zero;
 	bool_t measure;
 } sensor;
 
@@ -44,6 +47,8 @@ typedef struct {
 	sensor* sens;
 	period_t period; //in usecs
 	volume_t volume;
+	volume_t approx;
+	volume_t volumemax;
 	ucounter_t serialno;
 	ucounter_t accuracy; //in samplerate points
 	ucounter_t period_divider;
@@ -59,6 +64,5 @@ extern sensor sensors[CHANNEL_NUM];
 
 void freqvolmeter_init();
 sensor_value* read_sensor(sensor* sens, sensor_value* buf);
-void reset_sensor(sensor* s);
 
 #endif

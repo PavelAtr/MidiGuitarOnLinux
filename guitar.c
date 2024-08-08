@@ -75,28 +75,40 @@ byte_t normalize_velocity(struna* str, int volume)
 
 void perform_freqvol(sensor_value* sensvalue, struna* str)
 {
-	if (debug_raw)
+	if (sensvalue->serialno == str->serialno)
 	{
-		if (sensvalue->volume > volume_max) volume_max = sensvalue->volume;
-		printf("chn=%d ser=%d MAX=%d RMS=%d per=%d acc=%d div=%d",
-			str->channel, sensvalue->serialno, volume_max,
-			sensvalue->volume, sensvalue->period,
-			sensvalue->accuracy, sensvalue->period_divider);
-		if (str->curvolume > str->oldvolume + VOLUME_NEW_TRESHOLD)
-			printf(" LOUDER=%d\n", str->curvolume - str->oldvolume);
-		else
-			printf("\n");
+		return;
+	}	
+	else
+	{
+		str->serialno = sensvalue->serialno;
 	}
 
-	if (sensvalue->errors)
-		reset_sensor(sensvalue->sens);
-
-	if (sensvalue->serialno == str->serialno)
-		return;
-	else str->serialno = sensvalue->serialno;
+	if (debug_raw)
+	{
+		if (sensvalue->volume > volume_max)
+		{
+			volume_max = sensvalue->volume;
+		}
+		printf("chn=%d ser=%d MAX=%d RMS=%d per=%d acc=%d div=%d approx=%d max=%d",
+			str->channel, sensvalue->serialno, volume_max,
+			sensvalue->volume, sensvalue->period,
+			sensvalue->accuracy, sensvalue->period_divider,
+			sensvalue->approx, sensvalue->volumemax);
+		if (str->curvolume > str->oldvolume + VOLUME_NEW_TRESHOLD)
+		{
+			printf(" LOUDER=%d\n", str->curvolume - str->oldvolume);
+		}
+		else
+		{
+			printf("\n");
+		}
+	}
 	
 	if (sensvalue->errors)
+	{
 		return;
+	}
 
 	str->oldvolume = str->curvolume;
 	str->curvolume = sensvalue->volume;
@@ -127,6 +139,10 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 		printf("%s\t%d%\n", notes[str->newnote.index].name, str->newnote.bend);
 	
 	if (str->newnote.index == -1) return;
+
+#ifndef EVENT_DOUBLECHECK
+	str->doublecheck = CHECK_NOCHECK;
+#endif
 	
 	// Frequency after silence
 	if (str->note_flags & NOTE_SILENCE)
@@ -140,7 +156,8 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 				printf("New note %d after SILENCE, volume=%d, period=%d\n",
 					str->newnote.index, sensvalue->volume, str->newnote.period);
 			}
-		} else
+		}
+		else
 		{
 			str->doublecheck |= CHECK_AFTERSILENCE;
 		}
@@ -152,10 +169,20 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 	// New note is louder
 		if (enable_tremolo)
 		{
+#ifdef EVENT_DOUBLECHECK
 			str->note_flags |= NOTE_LOUDER;
-			goto end;
+#else
+			flags |= NOTE_NEW;
+			if (debug_alg)
+			{
+				printf("New note %d as LOUDER, volume=%d period=%d\n",
+					str->newnote.index, str->curvolume, str->newnote.period);
+			}
+#endif
 		}
+		goto end;
 	}
+
 	if (str->curvolume < str->oldvolume && str->note_flags & NOTE_LOUDER)
 	{
 	// New note is louder
@@ -177,12 +204,11 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 		// if diff >= PITCH_STEP, newpitch
 			str->curnote.bend = str->newnote.bend;
 			flags |= NOTE_NEWPITCH;
-			str->doublecheck = 0;
 			if (debug_alg)
 			{
 				if (enable_bends)
 				{
-//					printf("New pitch %d in same note\n", str->newnote.bend);
+					printf("New pitch %d in same note\n", str->newnote.bend);
 				}
 			}
 			goto end;
@@ -218,7 +244,6 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 			{
 				if (str->doublecheck & CHECK_FURTHERPITCH)
 				{
-					str->doublecheck = 0;
 					flags |= NOTE_NEW;
 					if (debug_alg)
 					{
@@ -237,12 +262,11 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 				// if diff >= PITCH_STEP, newpitch
 				str->curnote.bend = newpitch;
 				flags |= NOTE_NEWPITCH;
-				str->doublecheck = 0;
 				if (debug_alg)
 				{
 					if (enable_bends)
 					{
-//						printf("New further pitch %d\n", newpitch);
+						printf("New further pitch %d\n", newpitch);
 					}
 				}
 				goto end;
@@ -261,9 +285,16 @@ end:
 		if (!(str->note_flags & NOTE_SILENCE))
 			str->note_flags |= NOTE_END;
 		str->note_flags &= ~NOTE_LOUDER;
+		str->doublecheck = 0;
 	}
-	if ((flags & NOTE_NEWPITCH) && !(str->note_flags & NOTE_SILENCE))
-		str->note_flags |= NOTE_NEWPITCH;
+	if (flags & NOTE_NEWPITCH)
+	{
+		if (!(str->note_flags & NOTE_SILENCE))
+		{
+			str->note_flags |= NOTE_NEWPITCH;
+		}
+		str->doublecheck = 0;
+	}
 }
 
 char tmp[30];

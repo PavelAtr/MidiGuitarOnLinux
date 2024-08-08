@@ -37,6 +37,8 @@ typedef struct {
 #define CHECK_AFTERSILENCE	0x01
 #define CHECK_NEWFREQUENCY 0x02
 #define CHECK_FURTHERPITCH 0x04
+#define CHECK_PITCH 0x08
+#define CHECK_NOCHECK  0xFF
 
 
 typedef struct {

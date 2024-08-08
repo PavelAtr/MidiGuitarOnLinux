@@ -36,6 +36,9 @@ int main(int argc, char** argv)
 		{
 			read_sensor(&sensors[i], &sensvalue[i]);
 			perform_freqvol(&sensvalue[i], &struny[i]);
+		}
+		for (ucounter_t i = 0; i < CHANNEL_NUM; i++)
+		{
 			perform_send(&struny[i]);
 		}
 		usleep(100);
