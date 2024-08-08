@@ -27,6 +27,7 @@ void adcperform(sensor* s, volume_t ADC)
 		else if (s->comparator_zero)
 		{
 			s->comparator_zero = 0;
+
 			if (s->ready)
 			{
 				semaphore_wait(s->sem);
@@ -42,12 +43,12 @@ void adcperform(sensor* s, volume_t ADC)
 				semaphore_post(s->sem);
 			}
 
-			if (s->accuracy_approx >= PERIOD_ACCURACY_MIN)
+			if (s->accuracy_approx >= (PERIOD_ACCURACY_MIN * 4))
 			{
-				volume_t vapprox = s->volume_approx / s->accuracy_approx;
-				s->volume_max_prev = vapprox;
+				volume_t volume_approx = s->volume_approx / s->accuracy_approx;
+				s->volume_max_prev = volume_approx;
 				s->volume_max = s->volume_max_prev;
-				s->volume_min_prev = - vapprox;
+				s->volume_min_prev = - volume_approx;
 				s->volume_min = s->volume_min_prev;
 				s->volume_approx = 0;
 				s->accuracy_approx = 0;
