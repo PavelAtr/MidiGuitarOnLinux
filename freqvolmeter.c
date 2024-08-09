@@ -27,7 +27,6 @@ void adcperform(sensor* s, volume_t ADC)
 		else if (s->comparator_zero)
 		{
 			s->comparator_zero = 0;
-
 			if (s->ready)
 			{
 				semaphore_wait(s->sem);
@@ -39,17 +38,15 @@ void adcperform(sensor* s, volume_t ADC)
 				s->accuracy = s->accuracy_tmp;
 				s->period_divider = s->period_divider_tmp;
 				s->volume_max_redy = s->volume_max;
+				s->approx_redy = s->volume_max_prev;
 				s->period_divider_tmp = 0;
 				semaphore_post(s->sem);
 			}
-
 			if (s->accuracy_approx >= (PERIOD_ACCURACY_MIN * 4))
 			{
-				volume_t volume_approx = s->volume_approx / s->accuracy_approx;
+				volume_t volume_approx = s->volume_approx * 120/ (s->accuracy_approx * 100);
 				s->volume_max_prev = volume_approx;
-				s->volume_max = s->volume_max_prev;
 				s->volume_min_prev = - volume_approx;
-				s->volume_min = s->volume_min_prev;
 				s->volume_approx = 0;
 				s->accuracy_approx = 0;
 			}
@@ -61,49 +58,52 @@ void adcperform(sensor* s, volume_t ADC)
 			s->accuracy_tmp++;
 		}
 
-		if (ADC >= s->volume_max)
+		if (ADC >= s->volume_max_prev)
 		{
-			s->volume_max = ADC;
-			s->cur_tmp = s->samplecounter;
 			s->comparator_min = 1;
-
-			if (s->volume_max >= s->volume_max_prev)
+			s->volume_min = s->volume_min_prev;
+			if (s->comparator_max)
 			{
-				if (s->comparator_max)
+				s->comparator_max = 0;
+				s->period_divider_tmp++;
+				if (s->period_divider_tmp < 2)
 				{
-					s->comparator_max = 0;
-					s->period_divider_tmp++;
-					s->volume_min = s->volume_min_prev;
+					s->volume_tmp = 0;
+					s->accuracy_tmp = 0;
+					s->measure = 1;
+				}
+				if (s->accuracy_tmp >= PERIOD_ACCURACY_MIN)
+				{
+					s->ready = 1;
+					s->measure = 0;
 				}
 			}
-			if (s->period_divider_tmp < 2)
+			if (ADC >= s->volume_max)
 			{
-				s->prev_tmp = s->samplecounter;
-				s->volume_tmp = 0;
-				s->accuracy_tmp = 0;
-				s->measure = 1;
-			}
-			if (s->accuracy_tmp > PERIOD_ACCURACY_MIN)
-			{
-				s->ready = 1;
-				s->measure = 0;
+				s->volume_max = ADC;
+				s->cur_tmp = s->samplecounter;
+				if (s->period_divider_tmp == 1)
+				{
+					s->prev_tmp = s->samplecounter;
+				}
 			}
 		}
 		
-		if (ADC <= s->volume_min)
+		if (ADC <= s->volume_min_prev)
 		{
-			s->volume_min = ADC;
-			if (s->volume_min <= s->volume_min_prev)
+			s->comparator_max = 1;
+			s->volume_max = s->volume_max_prev;
+			if (s->comparator_min)
 			{
-				s->comparator_max = 1;
-				if (s->comparator_min)
-				{
-					s->volume_max = s->volume_max_prev;
-					s->comparator_min = 0;
-				}
-
+				s->comparator_min = 0;
 			}
+			if (ADC <= s->volume_min)
+			{
+				s->volume_min = ADC;
+			}
+			
 		}
+		
 }
 
 void adcprocess()
@@ -139,7 +139,7 @@ sensor_value* read_sensor(sensor* s, sensor_value* buf)
 		buf->accuracy = s->accuracy;
 		buf->serialno = s->serialno;
 		buf->period_divider = s->period_divider;
-		buf->approx = s->volume_max_prev;
+		buf->approx = s->approx_redy;
 		buf->volumemax = s->volume_max_redy;
 		semaphore_post(s->sem);
 		buf->sens = s;

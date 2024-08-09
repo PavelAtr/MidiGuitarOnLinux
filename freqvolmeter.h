@@ -20,6 +20,7 @@ typedef struct {
 	volume_long_t volume_approx;
 	ucounter_t accuracy_approx;
 	volume_t volume_max_redy;
+	volume_t approx_redy;
 	ulongcounter_t prev;
 	ulongcounter_t cur;
 	ucounter_t period_divider;

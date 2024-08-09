@@ -198,8 +198,8 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 	if (str->newnote.index == str->curnote.index)
 	{
 	// Note same
-	
-		if (abs(str->curnote.bend - str->newnote.bend) >= PITCH_STEP)
+		if (abs(str->curnote.bend - str->newnote.bend) >= PITCH_STEP &&
+		!(str->note_flags & NOTE_SILENCE))
 		{
 		// if diff >= PITCH_STEP, newpitch
 			str->curnote.bend = str->newnote.bend;
@@ -211,9 +211,10 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 					printf("New pitch %d in same note\n", str->newnote.bend);
 				}
 			}
-			goto end;
 		}
-	} else
+		goto end;
+	}
+	else
 	{
 		if (abs(str->curnote.bend) < PITCH_TRESHOLD)
 		{
@@ -236,7 +237,8 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 				}
 			}
 			goto end;
-		} else
+		}
+		else
 		{
 			//Note pitched
 			pitch_t newpitch = search_pitch(&str->curnote, str->newnote.period);
@@ -257,16 +259,20 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 				}
 				goto end;
 			}
-			else if (abs(str->curnote.bend - newpitch) >= PITCH_STEP)
+			else
 			{
-				// if diff >= PITCH_STEP, newpitch
-				str->curnote.bend = newpitch;
-				flags |= NOTE_NEWPITCH;
-				if (debug_alg)
+				if (abs(str->curnote.bend - newpitch) >= PITCH_STEP &&
+				!(str->note_flags & NOTE_SILENCE))
 				{
-					if (enable_bends)
+					// if diff >= PITCH_STEP, newpitch
+					str->curnote.bend = newpitch;
+					flags |= NOTE_NEWPITCH;
+					if (debug_alg)
 					{
-						printf("New further pitch %d\n", newpitch);
+						if (enable_bends)
+						{
+							printf("New further pitch %d\n", newpitch);
+						}
 					}
 				}
 				goto end;
