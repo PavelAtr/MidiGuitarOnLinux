@@ -29,10 +29,27 @@ void adcperform(sensor* s, volume_t ADC)
 			s->comparator_zero = 0;
 			if (s->accuracy_approx >= PERIOD_ACCURACY_MIN * 4)
 			{
-				s->volume_max_prev = (s->volume_approx < s->volume_max_prev)? s->volume_approx : s->volume_max_prev;
-				s->volume_min_prev = (s->volume_approx > s->volume_min_prev)? s->volume_approx : s->volume_min_prev;
+				s->volume_max_prev = (s->volume_approx < s->volume_max_prev)?
+					s->volume_approx : s->volume_max_prev;
+				s->volume_min_prev = (- s->volume_approx > s->volume_min_prev)?
+					- s->volume_approx : s->volume_min_prev;
 				s->volume_approx = 0;
 				s->accuracy_approx = 0;
+			}
+			if (s->ready)
+			{
+				semaphore_wait(s->sem);
+				s->ready = 0;
+				s->serialno++;
+				s->prev = s->prev_tmp;
+				s->cur = s->cur_tmp;
+				s->volume = s->volume_tmp;
+				s->accuracy = s->accuracy_tmp;
+				s->period_divider = s->period_divider_tmp;
+				s->volume_max_redy = s->volume_max;
+				s->approx_redy = s->volume_max_prev;
+				s->period_divider_tmp = 0;
+				semaphore_post(s->sem);
 			}
 		}
 		if (ADC >= s->volume_max_prev * COMPARATOR_TRESOLD)
@@ -83,21 +100,6 @@ void adcperform(sensor* s, volume_t ADC)
 			if (ADC <= s->volume_min)
 			{
 				s->volume_min = ADC;
-			}
-			if (s->ready)
-			{
-				semaphore_wait(s->sem);
-				s->ready = 0;
-				s->serialno++;
-				s->prev = s->prev_tmp;
-				s->cur = s->cur_tmp;
-				s->volume = s->volume_tmp;
-				s->accuracy = s->accuracy_tmp;
-				s->period_divider = s->period_divider_tmp;
-				s->volume_max_redy = s->volume_max;
-				s->approx_redy = s->volume_max_prev;
-				s->period_divider_tmp = 0;
-				semaphore_post(s->sem);
 			}
 		}
 		if (s->measure)

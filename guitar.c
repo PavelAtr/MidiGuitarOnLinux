@@ -144,23 +144,26 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 #endif
 	
 	// Frequency after silence
-	if (str->note_flags & NOTE_SILENCE)
+	if (!enable_tremolo)
 	{
-		if (str->doublecheck & CHECK_AFTERSILENCE)
+		if (str->note_flags & NOTE_SILENCE)
 		{
-			flags |=  NOTE_NEW;
-			str->doublecheck = 0;
-			if (debug_alg)
+			if (str->doublecheck & CHECK_AFTERSILENCE)
 			{
-				printf("New note %d after SILENCE, volume=%d, period=%d\n",
-					str->newnote.index, sensvalue->volume, str->newnote.period);
+				flags |=  NOTE_NEW;
+				str->doublecheck = 0;
+				if (debug_alg)
+				{
+					printf("New note %d after SILENCE, volume=%d, period=%d\n",
+						str->newnote.index, sensvalue->volume, str->newnote.period);
+				}
 			}
+			else
+			{
+				str->doublecheck |= CHECK_AFTERSILENCE;
+			}
+			goto end;
 		}
-		else
-		{
-			str->doublecheck |= CHECK_AFTERSILENCE;
-		}
-		goto end;
 	}
 	
 	if (str->curvolume > str->oldvolume + VOLUME_NEW_TRESHOLD)
