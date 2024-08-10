@@ -8,7 +8,6 @@
 #include "cli.h"
 
 struna struny[CHANNEL_NUM];
-volume_t volume_max = 0;
 
 pitch_t search_pitch(note* inp, period_t period)
 {
@@ -86,12 +85,12 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 
 	if (debug_raw)
 	{
-		if (sensvalue->volume > volume_max)
+		if (sensvalue->volume > str->volume_max)
 		{
-			volume_max = sensvalue->volume;
+			str->volume_max = sensvalue->volume;
 		}
 		printf("chn=%d ser=%d MAX=%d RMS=%d per=%d acc=%d div=%d approx=%d max=%d",
-			str->channel, sensvalue->serialno, volume_max,
+			str->channel, sensvalue->serialno, str->volume_max,
 			sensvalue->volume, sensvalue->period,
 			sensvalue->accuracy, sensvalue->period_divider,
 			sensvalue->approx, sensvalue->volumemax);
@@ -219,24 +218,27 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 		if (abs(str->curnote.bend) < PITCH_TRESHOLD)
 		{
 		// Note not pitched, slide
-			if (enable_slides)
+			if (sensvalue->volume >= VOLUME_ACTUALFREQUENCY)
 			{
-				if (str->doublecheck & CHECK_NEWFREQUENCY)
+				if (enable_slides)
 				{
-					str->doublecheck = 0;
-					flags |= NOTE_NEW;
-					if (debug_alg)
+					if (str->doublecheck & CHECK_NEWFREQUENCY)
 					{
-						printf("New note %d as FREQUENCY, volume=%d, period=%d\n",
-							str->newnote.index, sensvalue->volume, str->newnote.period);
+						str->doublecheck = 0;
+						flags |= NOTE_NEW;
+						if (debug_alg)
+						{
+							printf("New note %d as FREQUENCY, volume=%d, period=%d\n",
+								str->newnote.index, sensvalue->volume, str->newnote.period);
+						}
+					}
+					else
+					{
+						str->doublecheck |= CHECK_NEWFREQUENCY;
 					}
 				}
-				else
-				{
-					str->doublecheck |= CHECK_NEWFREQUENCY;
-				}
+				goto end;
 			}
-			goto end;
 		}
 		else
 		{
@@ -244,20 +246,23 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 			pitch_t newpitch = search_pitch(&str->curnote, str->newnote.period);
 			if (abs(newpitch) > PITCH_FURTHER)
 			{
-				if (str->doublecheck & CHECK_FURTHERPITCH)
+				if (sensvalue->volume >= VOLUME_ACTUALFREQUENCY)
 				{
-					flags |= NOTE_NEW;
-					if (debug_alg)
+					if (str->doublecheck & CHECK_FURTHERPITCH)
 					{
-						printf("New note %d as FURTHER PITCH, volume=%d\n",
-							str->newnote.index + STARTMIDINOTE, sensvalue->volume);
+						flags |= NOTE_NEW;
+						if (debug_alg)
+						{
+							printf("New note %d as FURTHER PITCH, volume=%d\n",
+								str->newnote.index + STARTMIDINOTE, sensvalue->volume);
+						}
 					}
+					else
+					{
+						str->doublecheck |= CHECK_FURTHERPITCH;
+					}
+					goto end;
 				}
-				else
-				{
-					str->doublecheck |= CHECK_FURTHERPITCH;
-				}
-				goto end;
 			}
 			else
 			{
@@ -359,9 +364,9 @@ void perform_send(struna* str)
 		{
 			if (enable_bends)
 			{
-//				printf("chn=%d PITCHNEW=%d MSB=%d LSB=%d\r\n",
-//					str->channel, str->curnote.bend,
-//					tmppitch.bendMSB, tmppitch.bendLSB);
+				printf("chn=%d PITCHNEW=%d MSB=%d LSB=%d\r\n",
+					str->channel, str->curnote.bend,
+					tmppitch.bendMSB, tmppitch.bendLSB);
 			}
 		}
 		str->note_flags &= ~NOTE_NEWPITCH;
@@ -373,6 +378,6 @@ void guitar_init()
 	for (ucounter_t i = 0; i < CHANNEL_NUM; i++)
 	{
 		struny[i].channel = i;
-//		struny[i].volume_max = VOLUME_MAX_DEFAULT;
+		struny[i].volume_max = 0;
 	}
 }

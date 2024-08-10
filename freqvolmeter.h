@@ -11,7 +11,7 @@
 #define ADC_ZERO_SIN 0 //in ADC points
 #define ADC_ZERO_TRESHOLD 10 //in ASDC points
 #define ADC_MAX_RMS (ADC_MAX * 0.638) //in ADC points
-#define SUSTAIN_FACTOR 0.8 //0 ... 1 float
+#define COMPARATOR_TRESOLD 8 / 10 //0 ... 1 float
 
 
 typedef struct {

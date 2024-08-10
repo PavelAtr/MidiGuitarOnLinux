@@ -41,7 +41,7 @@ int main(int argc, char** argv)
 		{
 			perform_send(&struny[i]);
 		}
-		usleep(100);
+		usleep(10);
 	}
 	return 0;
 }
