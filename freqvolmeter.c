@@ -29,9 +29,9 @@ void adcperform(sensor* s, volume_t ADC)
 			s->comparator_zero = 0;
 			if (s->accuracy_approx >= PERIOD_ACCURACY_MIN * 4)
 			{
-				s->volume_max_prev = (s->volume_approx < s->volume_max_prev)?
+				s->volume_max_prev = (s->volume_max_prev > s->volume_approx)?
 					s->volume_approx : s->volume_max_prev;
-				s->volume_min_prev = (- s->volume_approx > s->volume_min_prev)?
+				s->volume_min_prev = (s->volume_min_prev < - s->volume_approx)?
 					- s->volume_approx : s->volume_min_prev;
 				s->volume_approx = 0;
 				s->accuracy_approx = 0;
@@ -62,23 +62,19 @@ void adcperform(sensor* s, volume_t ADC)
 			if (s->comparator_max)
 			{
 				s->comparator_max = 0;
-
 				s->period_divider_tmp++;
-				if (s->period_divider_tmp < 2)
-				{
-					s->volume_tmp = 0;
-					s->accuracy_tmp = 0;
-					s->measure = 1;
-				}
 			}
 			if (ADC >= s->volume_max)
 			{
 				s->volume_max = ADC;
 				s->cur_tmp = s->samplecounter;
-				if (s->period_divider_tmp == 1)
+				if (s->period_divider_tmp < 2)
 				{
 					s->prev_tmp = s->samplecounter;
-				}
+					s->volume_tmp = 0;
+					s->accuracy_tmp = 0;
+					s->measure = 1;
+			}
 				if (s->accuracy_tmp >= PERIOD_ACCURACY_MIN)
 				{
 					s->ready = 1;
