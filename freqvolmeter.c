@@ -52,7 +52,7 @@ void adcperform(sensor* s, volume_t ADC)
 				semaphore_post(s->sem);
 			}
 		}
-		if (ADC >= s->volume_max_prev * COMPARATOR_TRESOLD)
+		if (ADC > s->volume_max_prev * COMPARATOR_TRESOLD)
 		{
 		
 			s->volume_min_prev = (s->volume_min <= s->volume_min_prev * COMPARATOR_TRESOLD) ?
@@ -64,7 +64,7 @@ void adcperform(sensor* s, volume_t ADC)
 				s->comparator_max = 0;
 				s->period_divider_tmp++;
 			}
-			if (ADC >= s->volume_max)
+			if (ADC > s->volume_max)
 			{
 				s->volume_max = ADC;
 				s->cur_tmp = s->samplecounter;
@@ -82,7 +82,7 @@ void adcperform(sensor* s, volume_t ADC)
 				}
 			}
 		}
-		if (ADC <= s->volume_min_prev * COMPARATOR_TRESOLD)
+		if (ADC < s->volume_min_prev * COMPARATOR_TRESOLD)
 		{
 			s->comparator_max = 1;
 			s->volume_max_prev = (s->volume_max >= s->volume_max_prev * COMPARATOR_TRESOLD) ?
@@ -93,7 +93,7 @@ void adcperform(sensor* s, volume_t ADC)
 			{
 				s->comparator_min = 0;
 			}
-			if (ADC <= s->volume_min)
+			if (ADC < s->volume_min)
 			{
 				s->volume_min = ADC;
 			}
