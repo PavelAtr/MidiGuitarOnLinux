@@ -14,95 +14,96 @@ bool_t overload;
 
 void adcperform(sensor* s, volume_t ADC)
 {
-		volume_t ADC_abs = abs(ADC);
-		s->samplecounter++;
-		
-		s->volume_approx = (ADC > s->volume_approx)? ADC : s->volume_approx;
-		s->accuracy_approx++;
+	volume_t ADC_abs = abs(ADC);
 
-		if (ADC > 0)
-		{
-			s->comparator_zero = 1;
-		}
-		else if (s->comparator_zero)
-		{
-			s->comparator_zero = 0;
-			if (s->accuracy_approx >= PERIOD_ACCURACY_MIN * 4)
-			{
-				s->volume_max_prev = (s->volume_max_prev > s->volume_approx)?
-					s->volume_approx : s->volume_max_prev;
-				s->volume_min_prev = (s->volume_min_prev < - s->volume_approx)?
-					- s->volume_approx : s->volume_min_prev;
-				s->volume_approx = 0;
-				s->accuracy_approx = 0;
-			}
-			if (s->ready)
-			{
-				semaphore_wait(s->sem);
-				s->ready = 0;
-				s->serialno++;
-				s->prev = s->prev_tmp;
-				s->cur = s->cur_tmp;
-				s->volume = s->volume_tmp;
-				s->accuracy = s->accuracy_tmp;
-				s->period_divider = s->period_divider_tmp;
-				s->volume_max_redy = s->volume_max;
-				s->approx_redy = s->volume_max_prev;
-				s->period_divider_tmp = 0;
-				semaphore_post(s->sem);
-			}
-		}
-		if (ADC > s->volume_max_prev * COMPARATOR_TRESOLD)
-		{
-		
-			s->volume_min_prev = (s->volume_min <= s->volume_min_prev * COMPARATOR_TRESOLD) ?
-				s->volume_min : s->volume_min_prev;
-			s->comparator_min = 1;
-			s->volume_min = 0;
-			if (s->comparator_max)
-			{
-				s->comparator_max = 0;
-				s->period_divider_tmp++;
-			}
-			if (ADC > s->volume_max)
-			{
-				s->volume_max = ADC;
-				s->cur_tmp = s->samplecounter;
-				if (s->period_divider_tmp < 2)
-				{
-					s->prev_tmp = s->samplecounter;
-					s->volume_tmp = 0;
-					s->accuracy_tmp = 0;
-					s->measure = 1;
-			}
-				if (s->accuracy_tmp >= PERIOD_ACCURACY_MIN)
-				{
-					s->ready = 1;
-					s->measure = 0;
-				}
-			}
-		}
-		if (ADC < s->volume_min_prev * COMPARATOR_TRESOLD)
-		{
-			s->comparator_max = 1;
-			s->volume_max_prev = (s->volume_max >= s->volume_max_prev * COMPARATOR_TRESOLD) ?
-				s->volume_max : s->volume_max_prev;
-			s->volume_max = 0;
+	s->samplecounter++;
+	s->volume_approx = (ADC > s->volume_approx)? ADC : s->volume_approx;
+	s->accuracy_approx++;
 
-			if (s->comparator_min)
-			{
-				s->comparator_min = 0;
-			}
-			if (ADC < s->volume_min)
-			{
-				s->volume_min = ADC;
-			}
-		}
-		if (s->measure)
+	volume_t volume_max_prev_treshold = s->volume_max_prev * COMPARATOR_TRESOLD / 100;
+	volume_t volume_min_prev_treshold = s->volume_min_prev * COMPARATOR_TRESOLD / 100;
+
+	if (ADC > 0)
+	{
+		s->comparator_zero = 1;
+	}
+	else if (s->comparator_zero)
+	{
+		s->comparator_zero = 0;
+		if (s->accuracy_approx >= PERIOD_ACCURACY_MIN << 2)
 		{
-			s->volume_tmp += ADC_abs;
-			s->accuracy_tmp++;
+			s->volume_max_prev = (s->volume_max_prev > s->volume_approx)?
+				s->volume_approx : s->volume_max_prev;
+			s->volume_min_prev = (s->volume_min_prev < - s->volume_approx)?
+				- s->volume_approx : s->volume_min_prev;
+			s->volume_approx = 0;
+			s->accuracy_approx = 0;
 		}
+		if (s->ready)
+		{
+			s->ready = 0;
+			s->serialno++;
+			s->prev = s->prev_tmp;
+			s->cur = s->cur_tmp;
+			s->volume = s->volume_tmp;
+			s->accuracy = s->accuracy_tmp;
+			s->period_divider = s->period_divider_tmp;
+			s->volume_max_redy = s->volume_max;
+			s->approx_redy = s->volume_max_prev;
+			s->period_divider_tmp = 0;
+		}
+	}
+	if (ADC >= volume_max_prev_treshold)
+	{
+
+		s->volume_min_prev = (s->volume_min <= volume_min_prev_treshold) ?
+			s->volume_min : s->volume_min_prev;
+		s->comparator_min = 1;
+		s->volume_min = 0;
+		if (s->comparator_max)
+		{
+			s->comparator_max = 0;
+			s->period_divider_tmp++;
+		}
+		if (ADC >= s->volume_max)
+		{
+			s->volume_max = ADC;
+			s->cur_tmp = s->samplecounter;
+			if (s->period_divider_tmp < 2)
+			{
+				s->prev_tmp = s->samplecounter;
+				s->volume_tmp = 0;
+				s->accuracy_tmp = 0;
+				s->measure = 1;
+			}
+			if (s->accuracy_tmp >= PERIOD_ACCURACY_MIN)
+			{
+				s->ready = 1;
+				s->measure = 0;
+			}
+		}
+	}
+	if (ADC <= volume_min_prev_treshold)
+	{
+		s->comparator_max = 1;
+		s->volume_max_prev = (s->volume_max >= volume_max_prev_treshold) ?
+			s->volume_max : s->volume_max_prev;
+		s->volume_max = 0;
+
+		if (s->comparator_min)
+		{
+			s->comparator_min = 0;
+		}
+		if (ADC <= s->volume_min)
+		{
+			s->volume_min = ADC;
+		}
+	}
+	if (s->measure)
+	{
+		s->volume_tmp += ADC_abs;
+		s->accuracy_tmp++;
+	}	
 }
 
 void adcprocess()
