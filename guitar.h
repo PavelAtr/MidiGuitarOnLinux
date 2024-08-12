@@ -64,6 +64,7 @@ void guitar_init();
 void perform_freqvol(sensor_value* sensvalue, struna* str);
 void perform_send(struna* str);
 pitch* normalize_pitch(pitch* input, pitch_t bend);
+#define pitch_diff(pitch1, pitch2) (pitch2 > pitch1)? pitch2 - pitch1: pitch1 - pitch2
 
 #endif
 

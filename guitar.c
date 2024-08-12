@@ -114,16 +114,13 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 
 	if (sensvalue->volume < VOLUME_NOISE)
 	{
-		if (!(str->note_flags & NOTE_SILENCE))
+	// End note by volume if not silence
+		if (debug_alg)
 		{
-		// End note by volume if not silence
-			if (debug_alg)
-			{
-				printf("End note by volume\n");
-			}
-			note_copy(&str->oldnote, &str->curnote);
-			str->note_flags |= NOTE_END;
+			printf("End note by volume\n");
 		}
+		note_copy(&str->oldnote, &str->curnote);
+		str->note_flags |= NOTE_END;
 		// Nothing else
 		return;
 	}
@@ -135,7 +132,7 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 	search_note(&str->newnote);
 	
 	if (enable_tuning)
-		printf("%s\t%d%\n", notes[str->newnote.index].name, str->newnote.bend);
+		printf("%s\t%d% (period=%d)\n", notes[str->newnote.index].name, str->newnote.bend, str->newnote.period);
 	
 	if (str->newnote.index == -1) return;
 
@@ -146,24 +143,21 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 	// Frequency after silence
 	if (!enable_tremolo)
 	{
-		if (str->note_flags & NOTE_SILENCE)
+		if (str->doublecheck & CHECK_AFTERSILENCE)
 		{
-			if (str->doublecheck & CHECK_AFTERSILENCE)
+			flags |=  NOTE_NEW;
+			str->doublecheck = 0;
+			if (debug_alg)
 			{
-				flags |=  NOTE_NEW;
-				str->doublecheck = 0;
-				if (debug_alg)
-				{
-					printf("New note %d after SILENCE, volume=%d, period=%d\n",
-						str->newnote.index, sensvalue->volume, str->newnote.period);
-				}
+				printf("New note %d after SILENCE, volume=%d, period=%d\n",
+					str->newnote.index, sensvalue->volume, str->newnote.period);
 			}
-			else
-			{
-				str->doublecheck |= CHECK_AFTERSILENCE;
-			}
-			goto end;
 		}
+		else
+		{
+			str->doublecheck |= CHECK_AFTERSILENCE;
+		}
+		goto end;
 	}
 	
 	if (str->curvolume > str->oldvolume + VOLUME_NEW_TRESHOLD)
@@ -200,8 +194,7 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 	if (str->newnote.index == str->curnote.index)
 	{
 	// Note same
-		if (abs(str->curnote.bend - str->newnote.bend) >= PITCH_STEP &&
-		!(str->note_flags & NOTE_SILENCE))
+		if (pitch_diff(str->curnote.bend, str->newnote.bend) >= PITCH_STEP)
 		{
 		// if diff >= PITCH_STEP, newpitch
 			str->curnote.bend = str->newnote.bend;
@@ -269,8 +262,7 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 			}
 			else
 			{
-				if (abs(str->curnote.bend - newpitch) >= PITCH_STEP &&
-				!(str->note_flags & NOTE_SILENCE))
+				if (pitch_diff(str->curnote.bend, newpitch) >= PITCH_STEP)
 				{
 					// if diff >= PITCH_STEP, newpitch
 					str->curnote.bend = newpitch;

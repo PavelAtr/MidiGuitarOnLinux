@@ -1,12 +1,12 @@
 PREFIX ?= /usr/local
 
 all:
-	$(CC) $(CFLAGS) $(LDFLAGS) *.c -o MidiGuitarOnLinux -ljack
+	$(CC) $(CFLAGS) $(LDFLAGS) *.c -o SimpleMidiGuitar -ljack
 
 clean:
 	rm -f *.o *.gch
-	rm -f MidiGuitarOnLinux
+	rm -f SimpleMidiGuitar
 	
 install:
-	install MidiGuitarOnLinux $(DESTDIR)/$(PREFIX)/bin/MidiGuitarOnLinux
+	install MidiGuitarOnLinux $(DESTDIR)/$(PREFIX)/bin/SimpleMidiGuitar
 
