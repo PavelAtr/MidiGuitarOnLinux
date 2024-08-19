@@ -89,11 +89,10 @@ void perform_freqvol(sensor_value* sensvalue, struna* str)
 		{
 			str->volume_max = sensvalue->volume;
 		}
-		printf("chn=%d ser=%d MAX=%d RMS=%d per=%d acc=%d div=%d approx=%d max=%d",
+		printf("chn=%d ser=%d MAX=%d RMS=%d per=%d acc=%d div=%d",
 			str->channel, sensvalue->serialno, str->volume_max,
 			sensvalue->volume, sensvalue->period,
-			sensvalue->accuracy, sensvalue->period_divider,
-			sensvalue->approx, sensvalue->volumemax);
+			sensvalue->accuracy, sensvalue->period_divider);
 		if (str->curvolume > str->oldvolume + VOLUME_NEW_TRESHOLD)
 		{
 			printf(" LOUDER=%d\n", str->curvolume - str->oldvolume);

@@ -13,14 +13,11 @@
 #define ADC_MAX_RMS (ADC_MAX * 0.638) //in ADC points
 #define COMPARATOR_TRESOLD 80 // %
 
-
 typedef struct {
 	volume_long_t volume;
 	ucounter_t accuracy; //in 1/samplerate points
 	volume_long_t volume_approx;
 	ucounter_t accuracy_approx;
-	volume_t volume_max_redy;
-	volume_t approx_redy;
 	ulongcounter_t prev;
 	ulongcounter_t cur;
 	ucounter_t period_divider;
@@ -48,8 +45,6 @@ typedef struct {
 	sensor* sens;
 	period_t period; //in usecs
 	volume_t volume;
-	volume_t approx;
-	volume_t volumemax;
 	ucounter_t serialno;
 	ucounter_t accuracy; //in samplerate points
 	ucounter_t period_divider;

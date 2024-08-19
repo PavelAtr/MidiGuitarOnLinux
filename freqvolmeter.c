@@ -20,8 +20,8 @@ void adcperform(sensor* s, volume_t ADC)
 	s->volume_approx = (ADC > s->volume_approx)? ADC : s->volume_approx;
 	s->accuracy_approx++;
 
-	volume_t volume_max_prev_treshold = s->volume_max_prev * COMPARATOR_TRESOLD / 100;
-	volume_t volume_min_prev_treshold = s->volume_min_prev * COMPARATOR_TRESOLD / 100;
+	volume_t volume_max_treshold = s->volume_max_prev * COMPARATOR_TRESOLD / 100;
+	volume_t volume_min_treshold = s->volume_min_prev * COMPARATOR_TRESOLD / 100;
 
 	if (ADC > 0)
 	{
@@ -48,22 +48,20 @@ void adcperform(sensor* s, volume_t ADC)
 			s->volume = s->volume_tmp;
 			s->accuracy = s->accuracy_tmp;
 			s->period_divider = s->period_divider_tmp;
-			s->volume_max_redy = s->volume_max;
-			s->approx_redy = s->volume_max_prev;
 			s->period_divider_tmp = 0;
+			s->volume_tmp = 0;
+			s->accuracy_tmp = 0;
 		}
 	}
-	if (ADC >= volume_max_prev_treshold)
+	if (ADC >= 0 && ADC >= volume_max_treshold)
 	{
-
-		s->volume_min_prev = (s->volume_min <= volume_min_prev_treshold) ?
-			s->volume_min : s->volume_min_prev;
 		s->comparator_min = 1;
-		s->volume_min = 0;
 		if (s->comparator_max)
 		{
 			s->comparator_max = 0;
 			s->period_divider_tmp++;
+			s->volume_min_prev = s->volume_min;
+			s->volume_min = 0;
 		}
 		if (ADC >= s->volume_max)
 		{
@@ -72,8 +70,6 @@ void adcperform(sensor* s, volume_t ADC)
 			if (s->period_divider_tmp < 2)
 			{
 				s->prev_tmp = s->samplecounter;
-				s->volume_tmp = 0;
-				s->accuracy_tmp = 0;
 				s->measure = 1;
 			}
 			if (s->accuracy_tmp >= PERIOD_ACCURACY_MIN)
@@ -83,16 +79,14 @@ void adcperform(sensor* s, volume_t ADC)
 			}
 		}
 	}
-	if (ADC <= volume_min_prev_treshold)
+	if (ADC <= 0 && ADC <= volume_min_treshold)
 	{
 		s->comparator_max = 1;
-		s->volume_max_prev = (s->volume_max >= volume_max_prev_treshold) ?
-			s->volume_max : s->volume_max_prev;
-		s->volume_max = 0;
-
 		if (s->comparator_min)
 		{
 			s->comparator_min = 0;
+			s->volume_max_prev = s->volume_max;
+			s->volume_max = 0;
 		}
 		if (ADC <= s->volume_min)
 		{
@@ -139,8 +133,6 @@ sensor_value* read_sensor(sensor* s, sensor_value* buf)
 		buf->accuracy = s->accuracy;
 		buf->serialno = s->serialno;
 		buf->period_divider = s->period_divider;
-		buf->approx = s->approx_redy;
-		buf->volumemax = s->volume_max_redy;
 		semaphore_post(s->sem);
 		buf->sens = s;
 		buf->errors = 0;
