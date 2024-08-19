@@ -17,7 +17,7 @@ void adcperform(sensor* s, volume_t ADC)
 	volume_t ADC_abs = abs(ADC);
 
 	s->samplecounter++;
-	s->volume_approx = (ADC > s->volume_approx)? ADC : s->volume_approx;
+	s->volume_approx = (ADC_abs > s->volume_approx)? ADC_abs : s->volume_approx;
 	s->accuracy_approx++;
 
 	volume_t volume_max_treshold = s->volume_max_prev * COMPARATOR_TRESOLD / 100;
